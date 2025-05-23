@@ -1,5 +1,5 @@
 import { User } from "../models/user.model.js";
-import { mockAadharDB } from "../mockAadhaarDB.js";
+import { mockAadhaarDB } from "../db/mockAadhaarDB.js";
 import { mockPanDB } from "../db/mockPanDB.js";
 
 const calculateAge = (dob) => {
@@ -17,7 +17,7 @@ const calculateAge = (dob) => {
 };
 
 const verifyAadhaar = (aadhaar_number, user__dob, fullname, pan_number) => {
-  const aadhaarRecord = mockAadharDB.find(
+  const aadhaarRecord = mockAadhaarDB.find(
     (record) =>
       record.aadhaar_number === aadhaar_number &&
       record.fullname === fullname &&
@@ -47,7 +47,7 @@ const verifyPan = (pan_number, fullname, user_dob) => {
   }
 };
 
-const registeruser = async (req, res) => {
+export const registerUser = async (req, res) => {
   // get user details from frontend
   // validation- not empty
   // check if user already exists- email, username
@@ -67,6 +67,7 @@ const registeruser = async (req, res) => {
     phone_number,
     aadhaar_number,
     pan_number,
+    user_type,
   } = req.body;
 
   // validation
@@ -81,6 +82,7 @@ const registeruser = async (req, res) => {
       phone_number,
       aadhaar_number,
       pan_number,
+      user_type,
     ].some((field) => !field || field.trim() === "")
   ) {
     throw new Error("All fields are required");
@@ -129,8 +131,11 @@ const registeruser = async (req, res) => {
     username: username.toLowerCase(),
     user_dob,
     phone_number,
-    aadhaar_number,
-    pan_number,
+    goverment_ids: {
+      aadhaar_number,
+      pan_number,
+    },
+    user_type,
   });
 
   const createdUser = await User.findById(user._id).select("-password");
@@ -138,4 +143,12 @@ const registeruser = async (req, res) => {
   return res.status(201).json(createdUser);
 };
 
-export default registeruser;
+export const getUserByID = async (req, res) => {
+  const { id } = req.params;
+
+  const user = await User.findById(id).select("-password");
+  if (!user) {
+    throw new Error("User not found");
+  }
+  return res.status(200).json(user);
+};
