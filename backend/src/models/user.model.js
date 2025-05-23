@@ -1,0 +1,83 @@
+import mongoose from mongoose
+import validateor from "validator"
+
+const userSchema = mongoose.Schema({
+
+    fullname:{
+        type: String,
+        required: [true, "full name is required"],
+        trim: true,
+        index : true,
+
+
+    },
+    email:{
+        type: String,
+        required: true,
+        lowercase: true,
+        trim: true,
+        unique: true,
+        validate: [validateor.isEmail, "Invalid email address"]
+    },
+    contact:{
+        type: Number,
+        required: true,
+        unique: true,
+        
+    },
+    user_dob:{
+        type: Date,
+        required: true,
+        trim: true,
+        validate: [validateor.isDate, "Invalid date of birth"]
+    },
+   
+    user_type:{
+        type: String,
+        enum : ["instituation", "individual", "bank"],
+        required: [true, "user type is required"],
+    },
+    accounts: {
+        type: mongoose.Schema.Types.ObjectID,
+        ref: "Account",
+
+    },
+    goverment_ids : {
+        aadhaar_number: {
+            type: String,
+            required: [true, "adhar is required"],
+            trim : true,
+        },
+        pan_number:{
+            type: String,
+            required: [true, "pan is required"],
+            trim : true,
+        }
+      
+    },
+    kyc_status: {
+        type: String,
+        enum : ["pending", "approved", "rejected"],
+        default: "pending",
+    },
+    passport_number :{
+        type: String,
+        
+    },
+    password : {
+        type: String,
+        required: true,
+        trim: true,
+    },
+
+    refreshToken:{
+        type: String,
+        
+    }
+    
+    
+
+}, {timestamps:true})
+
+
+export const User = mongoose.model("User", userSchema);
