@@ -135,7 +135,7 @@ export default function CitiChainDashboard() {
             KYC
           </button>
           <button
-            onClick={() => navigate("/transfer")}
+onClick={() => navigate("/transfer-money")}
             className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-indigo-100 transition"
           >
             <ArrowUpTrayIcon className="w-6 h-6" />
@@ -236,131 +236,80 @@ export default function CitiChainDashboard() {
         <section className="space-y-10">
           <h2 className="text-3xl font-bold border-b-4 border-indigo-600 pb-2 mb-6">Services</h2>
 
-          {/* OneKYC & ZKPs */}
-          <div className="bg-white rounded-xl shadow-md p-6">
-            <h3 className="text-2xl font-semibold mb-4 flex items-center gap-2">
-              <ShieldCheckIcon className="w-7 h-7 text-indigo-600" />
-              OneKYC & ZKP Verification
-            </h3>
-            <p>Your identity is securely verified using zero-knowledge proofs.</p>
-            <p className="mt-3">
-              KYC Status:{" "}
-              <span className={`font-semibold ${mockUser.kycStatus === "verified" ? "text-green-600" : "text-red-600"}`}>
-                {mockUser.kycStatus.charAt(0).toUpperCase() + mockUser.kycStatus.slice(1)}
-              </span>
-            </p>
-            <p>ZKP Verified: {mockUser.zkpVerified ? "Yes ✅" : "No ❌"}</p>
-          </div>
+                   {/* OneKYC & Other Services */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
 
-          {/* Reputation Passport */}
-          <div className="bg-white rounded-xl shadow-md p-6">
-            <h3 className="text-2xl font-semibold mb-4 flex items-center gap-2">
-              <UserGroupIcon className="w-7 h-7 text-indigo-600" />
-              Reputation Passport (Soulbound NFTs & DID)
-            </h3>
-            <ul className="list-disc list-inside space-y-1 text-gray-700">
-              <li>Credit Score: <strong>{mockUser.reputation.creditScore}</strong></li>
-              <li>Loan Behavior: <strong>{mockUser.reputation.loanBehavior}</strong></li>
-              <li>Soulbound NFT: <code className="bg-gray-100 px-1 rounded">{mockUser.reputation.soulboundNFT}</code></li>
-              <li>DID: <code className="bg-gray-100 px-1 rounded">{mockUser.reputation.did}</code></li>
-            </ul>
-          </div>
-
-          {/* Consent Ledger */}
-          <div className="bg-white rounded-xl shadow-md p-6">
-            <h3 className="text-2xl font-semibold mb-4 flex items-center gap-2">
-              <ClipboardDocumentListIcon className="w-7 h-7 text-indigo-600" />
-              Consent Ledger (Merkle Trees + IPFS)
-            </h3>
-            <table className="w-full text-left border-collapse border border-gray-300">
-              <thead>
-                <tr className="bg-indigo-50">
-                  <th className="border border-gray-300 px-3 py-2">Data Requester</th>
-                  <th className="border border-gray-300 px-3 py-2">Date</th>
-                  <th className="border border-gray-300 px-3 py-2">Access</th>
-                  <th className="border border-gray-300 px-3 py-2">Merkle Proof</th>
-                </tr>
-              </thead>
-              <tbody>
-                {mockUser.consentLedger.map(({ id, dataRequester, date, access, merkleProof }) => (
-                  <tr key={id} className="hover:bg-indigo-50">
-                    <td className="border border-gray-300 px-3 py-2">{dataRequester}</td>
-                    <td className="border border-gray-300 px-3 py-2">{date}</td>
-                    <td className={`border border-gray-300 px-3 py-2 font-semibold ${access === "Granted" ? "text-green-600" : "text-red-600"}`}>
-                      {access}
-                    </td>
-                    <td className="border border-gray-300 px-3 py-2">
-                      <a href={merkleProof} target="_blank" rel="noreferrer" className="text-indigo-600 underline">View</a>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Smart Loan */}
-          <div className="bg-white rounded-xl shadow-md p-6">
-            <h3 className="text-2xl font-semibold mb-4 flex items-center gap-2">
-              <BuildingLibraryIcon className="w-7 h-7 text-indigo-600" />
-              Smart Loan (Merchant-locked)
-            </h3>
-            {mockUser.smartLoan.active ? (
-              <div className="space-y-2 text-gray-700">
-                <p>College: <strong>{mockUser.smartLoan.college}</strong></p>
-                <p>Amount: <strong>₹ {mockUser.smartLoan.amount.toLocaleString()}</strong></p>
-                <p>Purpose Locked: <strong>{mockUser.smartLoan.purposeLocked ? "Yes" : "No"}</strong></p>
-                <p>Merchant: <strong>{mockUser.smartLoan.merchant}</strong></p>
-                <p>EMI Paid: <strong>{mockUser.smartLoan.emiPaid} / {mockUser.smartLoan.emiTotal}</strong></p>
-                <p>Next EMI Due: <strong>{mockUser.smartLoan.emiNextDue}</strong></p>
+            {/* Reputation NFT */}
+            <div className="bg-white rounded-xl shadow-md p-6 flex flex-col gap-2">
+              <div className="flex items-center gap-3 text-indigo-700 font-semibold text-xl">
+                <ShieldCheckIcon className="w-6 h-6" />
+                Reputation NFT
               </div>
-            ) : (
-              <p className="text-red-600 font-semibold">No active smart loan</p>
-            )}
-          </div>
+              <p className="text-gray-600">Credit Score: <strong>{mockUser.reputation.creditScore}</strong></p>
+              <p className="text-gray-600">Loan Behavior: <strong>{mockUser.reputation.loanBehavior}</strong></p>
+              <p className="text-gray-600 break-all">Soulbound NFT: <code>{mockUser.reputation.soulboundNFT}</code></p>
+              <p className="text-gray-600 break-all">DID: <code>{mockUser.reputation.did}</code></p>
+            </div>
 
-          {/* Tokenized EMI Loan */}
-          <div className="bg-white rounded-xl shadow-md p-6">
-            <h3 className="text-2xl font-semibold mb-4 flex items-center gap-2">
-              <CurrencyRupeeIcon className="w-7 h-7 text-indigo-600" />
-              Tokenized EMI & Lending
-            </h3>
-            <p>Loan ID: <code className="bg-gray-100 px-1 rounded">{mockUser.tokenizedLoan.loanId}</code></p>
-            <p>
-              Etherscan:{" "}
+            {/* Consent Ledger */}
+            <div className="bg-white rounded-xl shadow-md p-6 flex flex-col gap-3">
+              <div className="flex items-center gap-3 text-indigo-700 font-semibold text-xl">
+                <ClipboardDocumentListIcon className="w-6 h-6" />
+                Consent Ledger
+              </div>
+              <ul className="text-gray-700 text-sm space-y-2">
+                {mockUser.consentLedger.map(entry => (
+                  <li key={entry.id} className="border-b pb-2">
+                    <p><strong>{entry.dataRequester}</strong> - {entry.access}</p>
+                    <p className="text-gray-500 text-xs">{entry.date}</p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Smart Loan */}
+            <div className="bg-white rounded-xl shadow-md p-6 flex flex-col gap-2">
+              <div className="flex items-center gap-3 text-indigo-700 font-semibold text-xl">
+                <BuildingLibraryIcon className="w-6 h-6" />
+                Smart Education Loan
+              </div>
+              <p className="text-gray-600">Institute: <strong>{mockUser.smartLoan.college}</strong></p>
+              <p className="text-gray-600">Loan Amount: ₹{mockUser.smartLoan.amount.toLocaleString()}</p>
+              <p className="text-gray-600">Locked to Merchant: <strong>{mockUser.smartLoan.merchant}</strong></p>
+              <p className="text-gray-600">EMI: {mockUser.smartLoan.emiPaid}/{mockUser.smartLoan.emiTotal}</p>
+              <p className="text-gray-600">Next Due: {mockUser.smartLoan.emiNextDue}</p>
+            </div>
+
+            {/* Tokenized Loan */}
+            <div className="bg-white rounded-xl shadow-md p-6 flex flex-col gap-3 col-span-full md:col-span-2 lg:col-span-1">
+              <div className="flex items-center gap-3 text-indigo-700 font-semibold text-xl">
+                <CurrencyRupeeIcon className="w-6 h-6" />
+                Tokenized Loan
+              </div>
+              <p className="text-gray-600 break-all">Loan ID: <code>{mockUser.tokenizedLoan.loanId}</code></p>
               <a
                 href={mockUser.tokenizedLoan.etherscanLink}
                 target="_blank"
-                rel="noreferrer"
-                className="text-indigo-600 underline"
+                rel="noopener noreferrer"
+                className="text-indigo-600 underline text-sm flex items-center gap-1"
               >
-                View Transaction
+                <LinkIcon className="w-4 h-4" />
+                View on Etherscan
               </a>
-            </p>
-            <p className="mt-3 font-semibold">Repayment Schedule:</p>
-            <ul className="list-disc list-inside space-y-1">
-              {mockUser.tokenizedLoan.repaymentSchedule.map(({ dueDate, amount, paid }, i) => (
-                <li key={i} className={paid ? "line-through text-green-600" : ""}>
-                  {dueDate} : ₹ {amount.toLocaleString()} — {paid ? "Paid" : "Pending"}
-                </li>
-              ))}
-            </ul>
-            <p className="mt-3">
-              Auto-Deduct EMI:{" "}
-              <strong>{mockUser.tokenizedLoan.autoDeduct ? "Enabled ✅" : "Disabled ❌"}</strong>
-            </p>
-            <p>
-              Oracle Feed:{" "}
-              <a
-                href={mockUser.tokenizedLoan.oracleFeed}
-                target="_blank"
-                rel="noreferrer"
-                className="text-indigo-600 underline"
-              >
-                {mockUser.tokenizedLoan.oracleFeed}
-              </a>
-            </p>
+              <p className="text-gray-600">Auto Deduct: {mockUser.tokenizedLoan.autoDeduct ? "Enabled" : "Disabled"}</p>
+              <ul className="text-gray-700 text-sm mt-2 space-y-1">
+                {mockUser.tokenizedLoan.repaymentSchedule.map((r, i) => (
+                  <li key={i} className="flex justify-between">
+                    <span>{r.dueDate}</span>
+                    <span>{r.paid ? "✅ Paid" : `₹${r.amount.toLocaleString()}`}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
           </div>
         </section>
+
       </main>
 
       {/* CitiGPT Chatbot Panel */}

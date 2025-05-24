@@ -4,7 +4,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import Signup from "./components/Signup";
 import Login from "./components/Login";            // Single login component
 import OTPVerify from "./components/OTPVerify";
-
+import TransferMoneyPage from "./components/TransferMoneyPage"; // ✅ correct path
 import Dashboard from "./components/Dashboard";
 import KYCStatus from "./pages/KYCStatus"; // adjust import path if needed
 
@@ -16,7 +16,6 @@ import KYCReview from "./components/KYCReview";
 import KYCAddress from "./components/KYCAddress";
 import KYCDeclaration from "./components/KYCDeclaration";
 import KYCDetails from "./components/KYCDetails"; // Basic Details
-import TransferMoneyPage from "./pages/TransferMoneyPage"; // Path must be correct
 import WelcomePage from "./pages/WelcomePage";
 
 // Placeholder components for Cards and Statements
@@ -51,7 +50,7 @@ const AppRoutes = () => (
 <Route path="/kyc/status" element={<KYCStatus />} />
 
     {/* Transfer Money */}
-    <Route path="/transfer-money" element={<TransferMoneyPage />} />
+<Route path="/transfer-money" element={<TransferMoneyPage />} />
 
     {/* Cards and Statements placeholders */}
     <Route path="/cards" element={<CardsPage />} />
