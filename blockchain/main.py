@@ -7,6 +7,10 @@ import json
 import motor.motor_asyncio
 import os
 from dotenv import load_dotenv
+from typing import Optional
+from bson import ObjectId
+from datetime import datetime
+
 
 load_dotenv()
 
@@ -20,6 +24,7 @@ client = motor.motor_asyncio.AsyncIOMotorClient(MONGO_URI)
 db = client[os.getenv("MONGO_DB")]
 users_collection = db["users"]
 transactions_collection = db["transactions"]
+kyc_collection = db["kyc_requests"]
 
 # FastAPI App
 app = FastAPI()
@@ -36,6 +41,17 @@ contract = w3.eth.contract(address=contract_address, abi=abi)
 # Owner Account
 owner_address = w3.eth.accounts[0]
 owner_private_key = os.getenv("OWNER_PRIVATE_KEY")
+
+ganache_url = os.getenv("GANACHE_URL")
+web3 = Web3(Web3.HTTPProvider(ganache_url))
+CONTRACT_ADDRESS = Web3.to_checksum_address(os.getenv("ONEKYC_CONTRACT_ADDRESS"))
+
+with open("OneKYC_abi.json") as f:
+    CONTRACT_ABI = json.load(f)
+
+contract_onekyc = web3.eth.contract(address=CONTRACT_ADDRESS, abi=CONTRACT_ABI)
+default_account = web3.eth.accounts[0]
+web3.eth.default_account = default_account
 
 
 # ------------------- Models ------------------- #
@@ -208,6 +224,135 @@ async def get_users():
 def serialize_doc(doc):
     doc["_id"] = str(doc["_id"])
     return doc
+
+
+# ===========================
+# SCHEMAS
+# ===========================
+
+
+class KYCRequestCreate(BaseModel):
+    user_address: str
+    data_hash: str
+
+
+class KYCReview(BaseModel):
+    user_address: str
+    passport_id: Optional[str]
+
+
+class KYCStatusCheck(BaseModel):
+    passport_id: str
+
+
+class KYCRequestModel(BaseModel):
+    id: Optional[str] = str(ObjectId())
+    user_address: str
+    data_hash: str
+    passport_id: Optional[str] = None
+    status: str = "Pending"
+    created_at: datetime = datetime.utcnow()
+
+
+# ===========================
+# BLOCKCHAIN FUNCTIONS
+# ===========================
+
+
+def submit_kyc(user_address: str, data_hash: str):
+    tx = contract_onekyc.functions.requestKYC(data_hash).build_transaction(
+        {
+            "from": user_address,
+            "nonce": web3.eth.get_transaction_count(user_address),
+            "gas": 300000,
+        }
+    )
+    return web3.eth.send_transaction(tx)
+
+
+def approve_kyc(user_address: str, passport_id: str):
+    tx = contract_onekyc.functions.approveKYC(
+        user_address, passport_id
+    ).build_transaction(
+        {
+            "from": default_account,
+            "nonce": web3.eth.get_transaction_count(default_account),
+            "gas": 300000,
+        }
+    )
+    return web3.eth.send_transaction(tx)
+
+
+def reject_kyc(user_address: str):
+    tx = contract_onekyc.functions.rejectKYC(user_address).build_transaction(
+        {
+            "from": default_account,
+            "nonce": web3.eth.get_transaction_count(default_account),
+            "gas": 300000,
+        }
+    )
+    return web3.eth.send_transaction(tx)
+
+
+def check_kyc(passport_id: str) -> bool:
+    return contract_onekyc.functions.isKYCApproved(passport_id).call()
+
+
+# ===========================
+# DATABASE FUNCTIONS
+# ===========================
+
+
+async def save_request(data: KYCRequestModel):
+    await kyc_collection.insert_one(data.dict())
+
+
+async def update_request_status(
+    user_address: str, status: str, passport_id: Optional[str] = None
+):
+    update = {"$set": {"status": status}}
+    if passport_id:
+        update["$set"]["passport_id"] = passport_id
+    await kyc_collection.update_one({"user_address": user_address}, update)
+
+
+async def get_request_by_passport(passport_id: str):
+    return await kyc_collection.find_one({"passport_id": passport_id})
+
+
+# ===========================
+# FASTAPI ROUTES
+# ===========================
+
+
+@app.post("/kyc/request")
+def request_kyc(payload: KYCRequestCreate):
+    tx_hash = submit_kyc(payload.user_address, payload.data_hash)
+    kyc = KYCRequestModel(
+        user_address=payload.user_address, data_hash=payload.data_hash
+    )
+    save_request(kyc)
+    return {"msg": "KYC submitted", "tx_hash": tx_hash.hex()}
+
+
+@app.post("/kyc/approve")
+def approve(payload: KYCReview):
+    tx_hash = approve_kyc(payload.user_address, payload.passport_id)
+    update_request_status(payload.user_address, "Approved", payload.passport_id)
+    return {"msg": "KYC approved", "tx_hash": tx_hash.hex()}
+
+
+@app.post("/kyc/reject")
+def reject(payload: KYCReview):
+    tx_hash = reject_kyc(payload.user_address)
+    update_request_status(payload.user_address, "Rejected")
+    return {"msg": "KYC rejected", "tx_hash": tx_hash.hex()}
+
+
+@app.post("/kyc/check")
+def check_status(payload: KYCStatusCheck):
+    approved = check_kyc(payload.passport_id)
+    return {"passport_id": payload.passport_id, "approved": approved}
 
 
 if __name__ == "__main__":
