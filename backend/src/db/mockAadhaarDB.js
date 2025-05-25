@@ -8,9 +8,9 @@ export const mockAadhaarDB = [
   },
   {
     aadhaar_number: "567856785678",
-    fullname: "Priya Singh",
-    dob: "2000-12-05",
-    gender: "Female",
+    fullname: "Rohit Gite",
+    dob: "2003-06-14",
+    gender: "Male",
     linked_pan: "PQRST6789Z",
   },
 ];

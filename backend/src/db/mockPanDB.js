@@ -7,8 +7,8 @@ export const mockPanDB = [
   },
   {
     pan_number: "PQRST6789Z",
-    fullname: "Priya Singh",
-    dob: "2000-12-05",
+    fullname: "Rohit Gite",
+    dob: "2003-06-14",
     aadhaar_linked: true,
   },
 ];
