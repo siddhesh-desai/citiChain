@@ -40,13 +40,14 @@ const userSchema = mongoose.Schema(
 
     user_type: {
       type: String,
-      enum: ["instituation", "individual", "bank"],
-      required: [true, "user type is required"],
+      default: "individual",
     },
-    accounts: {
-      type: mongoose.Schema.Types.ObjectID,
-      ref: "Account",
-    },
+    accounts: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Account",
+      },
+    ],
     goverment_ids: {
       aadhaar_number: {
         type: String,
@@ -59,6 +60,16 @@ const userSchema = mongoose.Schema(
         trim: true,
       },
     },
+    live_photo: {
+      type: String,
+      required: true,
+    },
+
+    signature: {
+      type: String,
+      required: true,
+    },
+
     kyc_status: {
       type: String,
       enum: ["pending", "approved", "rejected"],
@@ -71,6 +82,12 @@ const userSchema = mongoose.Schema(
       type: String,
       required: true,
       trim: true,
+    },
+
+    oneKYC_user_passport: {
+      type: String,
+      unique: true,
+      sparse: true,
     },
 
     refreshToken: {

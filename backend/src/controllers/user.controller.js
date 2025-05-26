@@ -4,6 +4,7 @@ import { mockPanDB } from "../db/mockPanDB.js";
 import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import uploadOnClaudinary from "../utils/claudinary.js";
 
 const generateAccessAndRefreshToken = async (userID) => {
   try {
@@ -89,7 +90,6 @@ const registerUser = async (req, res) => {
     phone_number,
     aadhaar_number,
     pan_number,
-    user_type,
   } = req.body;
 
   // validation
@@ -104,7 +104,6 @@ const registerUser = async (req, res) => {
       phone_number,
       aadhaar_number,
       pan_number,
-      user_type,
     ].some((field) => !field || field.trim() === "")
   ) {
     throw new Error("All fields are required");
@@ -142,6 +141,17 @@ const registerUser = async (req, res) => {
     throw new Error(pan_verification.message);
   }
 
+  const live_photo_LocalPath = req.file["live_photo"][0].path;
+
+  if (!live_photo_LocalPath) {
+    throw new ApiError(400, "Live photo is required");
+  }
+
+  const live_photo = await uploadOnClaudinary(live_photo_LocalPath);
+
+  if (!live_photo) {
+    throw new ApiError(400, "Live photo uploading failed");
+  }
   // generate a passport number
 
   // create user object
@@ -157,7 +167,7 @@ const registerUser = async (req, res) => {
       aadhaar_number,
       pan_number,
     },
-    user_type,
+    live_photo: live_photo.url,
   });
 
   const createdUser = await User.findById(user._id).select("-password");
