@@ -46,10 +46,15 @@ const mockUser = {
     { id: 10, description: "IRCTC Train Ticket", amount: -850.0, date: "2025-05-11" },
   ],
   rupeeXHistory: [
-    { id: 1, type: "Sent", amount: -1250, to: "@edTechPro", date: "2025-05-19" },
-    { id: 2, type: "Received", amount: 5000, from: "@daoScholar", date: "2025-05-18" },
-    { id: 3, type: "Staked", amount: -2000, date: "2025-05-17" },
-  ],
+  { id: 1, type: "Sent", amount: -1250, to: "@edTechPro", date: "2025-05-25" },
+  { id: 2, type: "Received", amount: 5000, from: "@daoScholar", date: "2025-05-24" },
+  { id: 3, type: "Staked", amount: -2000, date: "2025-05-23" },
+  { id: 4, type: "Received", amount: 3500, from: "@devGuild", date: "2025-05-22" },
+  { id: 5, type: "Sent", amount: -1800, to: "@neoBank", date: "2025-05-21" },
+  { id: 6, type: "Sent", amount: -1300, to: "@neoBank", date: "2025-05-21" },
+  { id: 7, type: "Sent", amount: -1800, to: "IRCTC Ticket", date: "2025-05-11" },
+  { id: 8, type: "Received", amount: 18400, from: "radhika apte", date: "2025-04-21" },
+],
   emis: [
     { id: 1, label: "Laptop Loan", amount: 1500, status: "Pending" },
     { id: 2, label: "Tuition Fee", amount: 2000, status: "Paid" },
@@ -144,6 +149,27 @@ export default function Dashboard() {
             </ResponsiveContainer>
           </div>
         </section>
+        <section className="bg-blue-50 border border-blue-300 rounded-2xl p-6 shadow max-w-full max-h-72 overflow-y-auto">
+  <p className="text-sm text-blue-600 font-semibold mb-2">Citi Loyalty Token</p>
+  <h2 className="text-3xl font-bold text-blue-700 mb-4">1,500 Coins</h2>
+  <div className="space-y-3">
+    {[
+      { id: 1, coins: 300, desc: "Completing KYC via AI OneKYC", date: "2025-05-20" },
+      { id: 2, coins: 200, desc: "Making payments with RupeeX", date: "2025-05-22" },
+      { id: 3, coins: 150, desc: "Taking and repaying Smart Loans on time", date: "2025-05-23" },
+      { id: 4, coins: 100, desc: "Engaging with citiGPT regularly", date: "2025-05-24" },
+      { id: 5, coins: 100, desc: "Referring other users or merchants", date: "2025-05-25" },
+      { id: 6, coins: 150, desc: "Participating in challenge: Save ₹5,000 in 30 days", date: "2025-05-26" },
+      { id: 7, coins: 500, desc: "Participating in challenge: Pay EMI on time for 3 months", date: "2025-05-27" },
+    ].map((item) => (
+      <div key={item.id} className="flex justify-between text-blue-800 font-medium bg-blue-100 rounded px-4 py-2 shadow-sm">
+        <span>{item.desc}</span>
+        <span>+{item.coins} Coins</span>
+      </div>
+    ))}
+  </div>
+</section>
+
       </main>
 
       {/* Card Panel with Recent Transactions */}
