@@ -29,7 +29,7 @@ export default function KycDashboard() {
 
   const [scheduledDate, setScheduledDate] = useState("");
   const [scheduledTime, setScheduledTime] = useState("");
-  const [passwordGenerated, setPasswordGenerated] = useState("");
+  const [passportGenerated, setPassportGenerated] = useState("");
   const [redirectCountdown, setRedirectCountdown] = useState(3);
 
   const jitsiContainerRef = useRef(null);
@@ -88,14 +88,14 @@ export default function KycDashboard() {
     };
   }, [demoCallOpen]);
 
-  // Redirect after password generated
+  // Redirect after passport generated
   useEffect(() => {
-    if (passwordGenerated) {
+    if (passportGenerated) {
       const timer = setInterval(() => {
         setRedirectCountdown((prev) => {
           if (prev <= 1) {
             clearInterval(timer);
-            navigate("/dashboard"); // Change route accordingly
+            navigate("/dashboard");
             return 0;
           }
           return prev - 1;
@@ -104,7 +104,7 @@ export default function KycDashboard() {
 
       return () => clearInterval(timer);
     }
-  }, [passwordGenerated, navigate]);
+  }, [passportGenerated, navigate]);
 
   // Dates for date input (today to +1 month)
   const todayISO = new Date().toISOString().split("T")[0];
@@ -119,13 +119,13 @@ export default function KycDashboard() {
       alert("Please select both date and time.");
       return;
     }
-    const pwd = Math.floor(100000 + Math.random() * 900000).toString();
-    setPasswordGenerated(pwd);
+    const passport = Math.floor(100000 + Math.random() * 900000).toString();
+    setPassportGenerated(passport);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-purple-100 via-indigo-50 to-white p-8 font-sans text-gray-900">
-      <h1 className="text-3xl font-bold mb-8 text-indigo-700 text-center">
+    <div className="min-h-screen bg-gradient-to-r from-blue-100 via-blue-50 to-white p-8 font-sans text-gray-900">
+      <h1 className="text-3xl font-bold mb-8 text-blue-800 text-center">
         KYC Verification Dashboard
       </h1>
 
@@ -142,15 +142,15 @@ export default function KycDashboard() {
               <div
                 className={`w-10 h-10 rounded-full border-4 flex items-center justify-center transition-colors duration-500 ${
                   done
-                    ? "bg-indigo-600 border-indigo-600 text-white"
-                    : "bg-transparent border-gray-400 text-gray-400"
+                    ? "bg-blue-700 border-blue-700 text-white"
+                    : "bg-transparent border-blue-300 text-blue-300"
                 }`}
               >
                 ✓
               </div>
               <p
                 className={`mt-3 text-center font-semibold text-sm ${
-                  done ? "text-indigo-700" : "text-gray-400"
+                  done ? "text-blue-800" : "text-blue-300"
                 }`}
               >
                 {step}
@@ -160,8 +160,8 @@ export default function KycDashboard() {
                 <div
                   className={`absolute top-5 left-full h-1 w-16 ${
                     idx < animatedStep - 1
-                      ? "bg-indigo-600 transition-all duration-500"
-                      : "bg-gray-300"
+                      ? "bg-blue-700 transition-all duration-500"
+                      : "bg-blue-200"
                   }`}
                   style={{ marginLeft: 8 }}
                 />
@@ -173,14 +173,14 @@ export default function KycDashboard() {
 
       {/* Demo Call Section */}
       <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-6 mb-12">
-        <h2 className="text-xl font-semibold mb-4 text-indigo-700">
+        <h2 className="text-xl font-semibold mb-4 text-blue-800">
           Demo Call
         </h2>
 
         {!demoCallOpen ? (
           <button
             onClick={() => setDemoCallOpen(true)}
-            className="bg-indigo-600 text-white px-6 py-3 rounded-md shadow-md hover:bg-indigo-700 transition duration-300"
+            className="bg-blue-700 text-white px-6 py-3 rounded-md shadow-md hover:bg-blue-800 transition duration-300"
           >
             Start Demo Call
           </button>
@@ -221,7 +221,7 @@ export default function KycDashboard() {
 
       {/* Schedule Verification Call Section */}
       <section className="max-w-5xl mx-auto bg-white shadow-lg rounded-lg p-6">
-        <h2 className="text-xl font-bold mb-6 text-indigo-700">
+        <h2 className="text-xl font-bold mb-6 text-blue-800">
           Schedule Verification Call (Indian Time Only)
         </h2>
         <div className="flex flex-col md:flex-row gap-6 items-center">
@@ -229,7 +229,7 @@ export default function KycDashboard() {
           <div className="flex flex-col flex-1">
             <label
               htmlFor="date"
-              className="font-semibold mb-2 text-gray-700"
+              className="font-semibold mb-2 text-blue-700"
             >
               Select Date (IST)
             </label>
@@ -238,7 +238,7 @@ export default function KycDashboard() {
               type="date"
               value={scheduledDate}
               onChange={(e) => setScheduledDate(e.target.value)}
-              className="border border-indigo-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              className="border border-blue-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
               min={todayISO}
               max={maxDateISO}
             />
@@ -248,7 +248,7 @@ export default function KycDashboard() {
           <div className="flex flex-col flex-1">
             <label
               htmlFor="time"
-              className="font-semibold mb-2 text-gray-700"
+              className="font-semibold mb-2 text-blue-700"
             >
               Select Time Slot (IST)
             </label>
@@ -256,7 +256,7 @@ export default function KycDashboard() {
               id="time"
               value={scheduledTime}
               onChange={(e) => setScheduledTime(e.target.value)}
-              className="border border-indigo-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              className="border border-blue-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             >
               <option value="">-- Select a time slot --</option>
               {indianTimeSlots.map((slot) => (
@@ -271,24 +271,24 @@ export default function KycDashboard() {
           <div className="flex justify-center items-end">
             <button
               onClick={handleSchedule}
-              disabled={passwordGenerated}
+              disabled={passportGenerated}
               className={`${
-                passwordGenerated
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-indigo-600 hover:bg-indigo-700"
+                passportGenerated
+                  ? "bg-blue-400 cursor-not-allowed"
+                  : "bg-blue-700 hover:bg-blue-800"
               } text-white font-semibold rounded-md px-6 py-3 shadow-md transition duration-300`}
             >
-              {passwordGenerated ? "Scheduled" : "Schedule Verification Call"}
+              {passportGenerated ? "Scheduled" : "Schedule Verification Call"}
             </button>
           </div>
         </div>
 
-        {/* Password and Redirect */}
-        {passwordGenerated && (
-          <div className="mt-8 bg-indigo-100 text-indigo-800 p-4 rounded-md font-mono text-center text-lg shadow-inner">
+        {/* Passport Display and Redirect */}
+        {passportGenerated && (
+          <div className="mt-8 bg-blue-100 text-blue-900 p-4 rounded-md font-mono text-center text-lg shadow-inner">
             <p>
-              Password Generated:{" "}
-              <span className="font-bold">{passwordGenerated}</span>
+              Passport Generated:{" "}
+              <span className="font-bold">{passportGenerated}</span>
             </p>
             <p className="mt-2 text-sm text-gray-700">
               Redirecting to main dashboard in {redirectCountdown} second

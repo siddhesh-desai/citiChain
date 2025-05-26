@@ -6,7 +6,7 @@ import Login from "./components/Login";            // Single login component
 import OTPVerify from "./components/OTPVerify";
 import TransferMoneyPage from "./components/TransferMoneyPage"; // ✅ correct path
 import Dashboard from "./components/Dashboard";
-import KYCStatus from "./pages/KYCStatus"; // adjust import path if needed
+import KYCStatus from "./pages/KYCStatus"; 
 
 // KYC Steps
 import KYCStartDecision from "./components/KYCStartDecision";
@@ -18,9 +18,29 @@ import KYCDeclaration from "./components/KYCDeclaration";
 import KYCDetails from "./components/KYCDetails"; // Basic Details
 import WelcomePage from "./pages/WelcomePage";
 
+//passport 
+
+import ReputationPassport from "./components/ReputationPassport"; // adjust path as needed
+import SmartLoanPage from "./components/SmartLoanPage";
+import TokenizedLendingPage from "./components/TokenizedLendingPage";
+import RupeeXStablecoinPage from "./components/RupeeXStablecoinPage";
+import RupeeXSetup from "./components/RupeeXSetup";
+import RupeeXHistoryPage from "./components/RupeeXHistoryPage";
+
+//bank
+import BankLoginPage from "./components/BankLoginPage";
+import BankDashboard from "./pages/BankDashboard";
+//institute
+import InstitutionLogin from "./components/InstitutionLogin";
+import InstitutionDashboard from "./components/InstitutionDashboard"; // adjust the path based on your file structure
+
+
 // Placeholder components for Cards and Statements
 const CardsPage = () => <div className="p-6">Cards Page (Coming Soon)</div>;
 const StatementsPage = () => <div className="p-6">Statements Page (Coming Soon)</div>;
+
+
+
 
 // Pages
 
@@ -48,13 +68,29 @@ const AppRoutes = () => (
     <Route path="/kyc/declaration" element={<KYCDeclaration />} />
     <Route path="/kyc/review" element={<KYCReview />} />
 <Route path="/kyc/status" element={<KYCStatus />} />
+{/*passport*/}
+<Route path="/passport" element={<ReputationPassport />} />
+<Route path="/smart-loan" element={<SmartLoanPage />} />
+<Route path="/tokenized-lending" element={<TokenizedLendingPage />} />
 
     {/* Transfer Money */}
 <Route path="/transfer-money" element={<TransferMoneyPage />} />
 
+    {/*bank*/}
+<Route path="/bank-login" element={<BankLoginPage />} />
+<Route path="/bank/dashboard" element={<BankDashboard />} />
+
+  {/*institute*/}
+<Route path="/institution/login" element={<InstitutionLogin />} />
+<Route path="/institution/dashboard" element={<InstitutionDashboard />} />
+
+
     {/* Cards and Statements placeholders */}
     <Route path="/cards" element={<CardsPage />} />
     <Route path="/statements" element={<StatementsPage />} />
+<Route path="/rupeex" element={<RupeeXStablecoinPage />} />
+<Route path="/rupeex-setup" element={<RupeeXSetup />} />
+<Route path="/rupeex/history" element={<RupeeXHistoryPage />} />
 
     {/* Catch-all: redirect unknown routes to welcome page */}
     <Route path="*" element={<Navigate to="/" replace />} />

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-const BLUE_START = "#1e40af";  // changed to blue gradient start
-const BLUE_END = "#2563eb";    // changed to blue gradient end
+const BLUE_START = "#1e40af"; // primary blue start
+const BLUE_END = "#2563eb";   // primary blue end
 
 export default function KYCReview({ kycData }) {
   const navigate = useNavigate();
@@ -28,7 +28,7 @@ export default function KYCReview({ kycData }) {
     motherName: "Sunita Sharma",
     documentsUploaded: ["Aadhaar Card (Front & Back)", "PAN Card", "Passport (Optional)"],
     livePhotoStatus: "Live selfie captured",
-    livePhotoURL: "", // Insert base64 or URL here
+    livePhotoURL: "",
     declarationAccepted: true,
   };
 
@@ -36,7 +36,6 @@ export default function KYCReview({ kycData }) {
   const [declarationAgreed, setDeclarationAgreed] = useState(
     kycData?.declarationAccepted ?? defaultData.declarationAccepted
   );
-
   const [otp, setOtp] = useState("");
   const [error, setError] = useState("");
   const [resendMessage, setResendMessage] = useState("");
@@ -67,7 +66,7 @@ export default function KYCReview({ kycData }) {
       return;
     }
     alert("KYC submitted for verification successfully!");
-    navigate("/dashboard");
+    navigate("/kyc/status");
   };
 
   const handleOtpChange = (e) => {
@@ -87,34 +86,40 @@ export default function KYCReview({ kycData }) {
     <div
       style={{
         minHeight: "100vh",
-        background: `linear-gradient(135deg, ${BLUE_START} 0%, ${BLUE_END} 100%)`,
-        color: "#f9fafb",
-        padding: "40px 20px",
+        background:
+          "linear-gradient(180deg, #f8fafc 0%, #e0e7ff 100%)", // subtle light gradient background
+        color: "#1e40af",
+        padding: "48px 16px",
         fontFamily:
           "'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-        overflowY: "auto",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "flex-start",
       }}
     >
       <div
         style={{
           maxWidth: 900,
+          width: "100%",
           margin: "auto",
           backgroundColor: "white",
-          borderRadius: 14,
+          borderRadius: 16,
           padding: 40,
-          boxShadow: "0 16px 40px rgba(0, 0, 0, 0.3)",
-          animation: "fadeInUp 0.7s ease forwards",
+          boxShadow: "0 12px 24px rgba(30, 64, 175, 0.15)",
           color: "#111827",
+          userSelect: "none",
+          display: "flex",
+          flexDirection: "column",
         }}
       >
         <h1
           style={{
             fontSize: "2.75rem",
             fontWeight: 700,
-            marginBottom: 20,
-            borderBottom: `4px solid ${BLUE_END}`,
+            marginBottom: 24,
+            borderBottom: `4px solid ${BLUE_START}`,
             paddingBottom: 10,
-            color: BLUE_END,
+            color: BLUE_START,
             userSelect: "none",
           }}
         >
@@ -156,9 +161,12 @@ export default function KYCReview({ kycData }) {
           <ul
             style={{
               listStyleType: "disc",
-              marginLeft: 20,
-              color: "#374151",
+              marginLeft: 24,
               fontSize: 16,
+              color: BLUE_START,
+              fontWeight: 600,
+              fontFamily:
+                "'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
             }}
           >
             {formData.documentsUploaded.map((doc, i) => (
@@ -179,8 +187,8 @@ export default function KYCReview({ kycData }) {
                 height: 140,
                 borderRadius: "50%",
                 objectFit: "cover",
-                border: `4px solid ${BLUE_END}`,
-                boxShadow: `0 0 15px ${BLUE_END}`,
+                border: `3px solid ${BLUE_START}`,
+                boxShadow: `0 0 14px ${BLUE_START}`,
               }}
             />
           ) : (
@@ -196,23 +204,25 @@ export default function KYCReview({ kycData }) {
           )}
         </Section>
 
-        {/* Declaration checkbox section - unchanged */}
+        {/* Declaration checkbox */}
         <section
           style={{
-            marginTop: 32,
-            borderTop: `2px solid ${BLUE_END}`,
+            marginTop: 36,
+            borderTop: `2px solid ${BLUE_START}`,
             paddingTop: 20,
-            color: "#374151",
+            color: "#4B5563",
           }}
         >
           <label
             style={{
               display: "flex",
               alignItems: "center",
-              gap: 10,
+              gap: 12,
               cursor: "pointer",
               userSelect: "none",
               fontSize: 15,
+              fontWeight: 600,
+              color: "#374151",
             }}
           >
             <input
@@ -222,8 +232,9 @@ export default function KYCReview({ kycData }) {
               style={{
                 width: 22,
                 height: 22,
-                accentColor: BLUE_END,
+                accentColor: BLUE_START,
                 cursor: "pointer",
+                borderRadius: 4,
               }}
             />
             I hereby declare that all the information provided above is true,
@@ -231,11 +242,11 @@ export default function KYCReview({ kycData }) {
           </label>
         </section>
 
-        {/* OTP section - ONLY show if declaration checkbox is checked */}
+        {/* OTP section */}
         {declarationAgreed && (
           <section
             style={{
-              marginTop: 24,
+              marginTop: 28,
               paddingTop: 20,
               borderTop: `1px solid #d1d5db`,
             }}
@@ -244,8 +255,8 @@ export default function KYCReview({ kycData }) {
               htmlFor="otp-input"
               style={{
                 display: "block",
-                fontWeight: 600,
-                marginBottom: 8,
+                fontWeight: 700,
+                marginBottom: 10,
                 color: "#374151",
                 userSelect: "none",
                 fontSize: 16,
@@ -264,12 +275,15 @@ export default function KYCReview({ kycData }) {
               maxLength={6}
               style={{
                 width: "100%",
-                padding: "12px 14px",
+                padding: "14px 16px",
                 fontSize: 18,
                 borderRadius: 8,
-                border: error ? "2px solid #dc2626" : "1px solid #9ca3af",
+                border: error ? "2px solid #dc2626" : `1.5px solid ${BLUE_START}`,
                 outline: "none",
                 boxSizing: "border-box",
+                transition: "border-color 0.3s ease",
+                fontWeight: 600,
+                color: "#111827",
               }}
             />
             {error && (
@@ -277,7 +291,7 @@ export default function KYCReview({ kycData }) {
                 style={{
                   color: "#dc2626",
                   marginTop: 6,
-                  fontWeight: 600,
+                  fontWeight: 700,
                   userSelect: "none",
                 }}
               >
@@ -289,16 +303,17 @@ export default function KYCReview({ kycData }) {
               onClick={resendOtp}
               type="button"
               style={{
-                marginTop: 12,
+                marginTop: 14,
                 background: "none",
                 border: "none",
-                color: BLUE_END,
-                fontWeight: "600",
+                color: BLUE_START,
+                fontWeight: "700",
                 cursor: "pointer",
                 textDecoration: "underline",
                 userSelect: "none",
                 fontSize: 15,
                 padding: 0,
+                letterSpacing: 0.4,
               }}
             >
               Resend OTP
@@ -308,8 +323,8 @@ export default function KYCReview({ kycData }) {
               <p
                 style={{
                   marginTop: 8,
-                  color: "#2563eb",
-                  fontWeight: 600,
+                  color: BLUE_END,
+                  fontWeight: 700,
                   userSelect: "none",
                 }}
               >
@@ -323,28 +338,32 @@ export default function KYCReview({ kycData }) {
           onClick={handleSubmit}
           disabled={!declarationAgreed || otp.length !== 6}
           style={{
-            marginTop: 30,
+            marginTop: 36,
             width: "100%",
             padding: "16px 0",
             backgroundColor:
-              declarationAgreed && otp.length === 6 ? BLUE_END : "#93c5fd",
+              declarationAgreed && otp.length === 6 ? BLUE_START : "#a5b4fc",
             color: "white",
             border: "none",
-            borderRadius: 10,
+            borderRadius: 12,
             fontWeight: 700,
             fontSize: 18,
             cursor:
               declarationAgreed && otp.length === 6 ? "pointer" : "not-allowed",
             transition: "background-color 0.3s ease",
             userSelect: "none",
+            boxShadow:
+              declarationAgreed && otp.length === 6
+                ? `0 8px 20px ${BLUE_START}aa`
+                : "none",
           }}
           onMouseEnter={(e) => {
             if (declarationAgreed && otp.length === 6)
-              e.currentTarget.style.backgroundColor = "#1e3a8a";
+              e.currentTarget.style.backgroundColor = "#1c3a8a";
           }}
           onMouseLeave={(e) => {
             if (declarationAgreed && otp.length === 6)
-              e.currentTarget.style.backgroundColor = BLUE_END;
+              e.currentTarget.style.backgroundColor = BLUE_START;
           }}
         >
           Submit KYC
@@ -356,15 +375,15 @@ export default function KYCReview({ kycData }) {
 
 function Section({ title, children }) {
   return (
-    <section style={{ marginBottom: 28 }}>
+    <section style={{ marginBottom: 32 }}>
       <h2
         style={{
           fontSize: "1.6rem",
           fontWeight: 700,
-          borderBottom: "2px solid #e5e7eb",
+          borderBottom: `2px solid ${BLUE_START}`,
           paddingBottom: 6,
-          marginBottom: 12,
-          color: "#1e3a8a",
+          marginBottom: 16,
+          color: BLUE_START,
           userSelect: "none",
         }}
       >
@@ -379,11 +398,12 @@ function Field({ label, value }) {
   return (
     <div
       style={{
-        marginBottom: 10,
+        marginBottom: 12,
         fontSize: 16,
         display: "flex",
         justifyContent: "space-between",
         userSelect: "none",
+        gap: 10,
       }}
     >
       <span

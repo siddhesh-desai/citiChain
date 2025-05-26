@@ -99,7 +99,7 @@ export default function KYCUpload() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#1e1e2f] via-[#2d2d44] to-[#1e1e2f] text-white flex items-center justify-center px-6 py-12">
+<div className="min-h-screen bg-gradient-to-br from-[#1E40AF] via-[#3B82F6] to-[#1E40AF] text-white flex items-center justify-center px-6 py-12">
       <div className="w-full max-w-3xl bg-white/10 border border-white/10 backdrop-blur-xl rounded-3xl p-10 shadow-2xl">
         <h1 className="text-2xl font-semibold text-center mb-1">Upload Your KYC Documents</h1>
         <p className="text-sm text-center text-white/70 mb-6">
@@ -118,7 +118,7 @@ export default function KYCUpload() {
                   <p className="text-xs text-white/50 mt-1">Click to upload</p>
                 </>
               ) : (
-                <p className="text-sm truncate text-green-400 font-semibold">{documents[id].name}</p>
+<p className="text-sm truncate font-semibold text-[#1E40AF]">{documents[id].name}</p>
               )}
 
               <input
@@ -126,15 +126,22 @@ export default function KYCUpload() {
                 accept=".jpg,.jpeg,.png,.pdf"
                 ref={(el) => (inputRefs.current[id] = el)}
                 className="hidden"
-                onChange={(e) => handleFileUpload(id, e.target.files[0])}
+onChange={(e) => {
+  if (e.target.files && e.target.files[0]) {
+    handleFileUpload(id, e.target.files[0]);
+  }
+}}
               />
-              {loadingDoc === id && (
-                <p className="mt-2 text-yellow-300 text-sm">Parsing with AI…</p>
-              )}
-              {ocrData[id] && !loadingDoc && !errors[id] && (
-                <p className="mt-2 text-green-300 text-sm select-text truncate max-w-full">OCR Done ✅</p>
-              )}
-              {errors[id] && <p className="text-red-400 text-sm mt-1 font-semibold">{errors[id]}</p>}
+            {loadingDoc === id && (
+  <p className="mt-2 text-white text-sm">Parsing with AI…</p>
+)}
+{ocrData[id] && !loadingDoc && !errors[id] && (
+  <p className="mt-2 text-white text-sm select-text truncate max-w-full">OCR Done!</p>
+)}
+{errors[id] && (
+  <p className="text-white text-sm mt-1 font-semibold">{errors[id]}</p>
+)}
+
             </div>
           ))}
         </div>
@@ -142,11 +149,13 @@ export default function KYCUpload() {
         <button
           onClick={handleContinue}
           disabled={!allRequiredUploaded}
-          className={`mt-8 w-full py-3 rounded-xl font-semibold tracking-wide transition duration-300 text-white ${
-            allRequiredUploaded
-              ? "bg-gradient-to-r from-green-400 to-blue-500 hover:from-blue-500 hover:to-green-400 cursor-pointer"
-              : "bg-gray-500 cursor-not-allowed text-white/70"
-          }`}
+className={`mt-8 w-full py-3 rounded-xl font-semibold tracking-wide transition duration-300 text-white ${
+  allRequiredUploaded
+    ? "bg-[#1E40AF] hover:bg-[#3B82F6] cursor-pointer"
+    : "bg-gray-500 cursor-not-allowed text-white/70"
+}`}
+
+
         >
           Continue to Live Photo →
         </button>

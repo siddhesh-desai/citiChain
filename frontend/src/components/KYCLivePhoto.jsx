@@ -97,9 +97,9 @@ export default function KYCLivePhoto() {
       <div className="w-full max-w-4xl bg-white border border-gray-200 rounded-3xl p-10 shadow-2xl flex flex-col md:flex-row items-center gap-8">
         {/* Left Panel */}
         <div className="w-full md:w-1/2 flex flex-col items-center">
-          <Camera className="w-14 h-14 text-indigo-600 mb-4 animate-pulse" />
-          <h2 className="text-2xl font-bold text-gray-800 text-center">Live Photo Verification</h2>
-          <p className="text-gray-500 text-sm text-center mt-2">
+          <Camera className="w-14 h-14 text-[#1E40AF] mb-4 animate-pulse" />
+          <h2 className="text-2xl font-bold text-[#1E40AF] text-center">Live Photo Verification</h2>
+          <p className="text-[#3B82F6] text-sm text-center mt-2">
             Click a live photo or upload from your device. Our AI will verify your identity.
           </p>
         </div>
@@ -120,18 +120,18 @@ export default function KYCLivePhoto() {
                 />
                 <button
                   onClick={capture}
-                  className="mt-6 w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition flex items-center justify-center gap-2"
+                  className="mt-6 w-full py-3 bg-[#1E40AF] hover:bg-[#1A368C] text-white font-semibold rounded-lg transition flex items-center justify-center gap-2"
                 >
                   <Camera className="w-5 h-5" /> Capture Photo
                 </button>
 
                 <div className="mt-6">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Or upload a photo</label>
+                  <label className="block text-sm font-medium text-[#1E40AF] mb-2">Or upload a photo</label>
                   <input
                     type="file"
                     accept="image/png, image/jpeg, image/jpg"
                     onChange={handleFileUpload}
-                    className="w-full border border-gray-300 rounded-lg p-2 text-sm file:bg-indigo-100 file:border-none file:mr-4 file:px-4 file:py-2 file:rounded file:text-indigo-700 file:font-semibold"
+                    className="w-full border border-[#1E40AF] rounded-lg p-2 text-sm file:bg-[#3B82F6] file:border-none file:mr-4 file:px-4 file:py-2 file:rounded file:text-[#1E40AF] file:font-semibold"
                   />
                   {uploadError && <p className="text-red-600 mt-2 font-semibold">{uploadError}</p>}
                   {faceWarning && (
@@ -153,11 +153,11 @@ export default function KYCLivePhoto() {
                     onClick={reset}
                     className="flex-1 py-3 bg-gray-200 hover:bg-gray-300 rounded-lg font-semibold transition flex items-center justify-center gap-2"
                   >
-                    <RefreshCw className="w-5 h-5" /> Retake
+                    <RefreshCw className="w-5 h-5 text-[#1E40AF]" /> Retake
                   </button>
                   <button
                     onClick={handleContinue}
-                    className="flex-1 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold transition flex items-center justify-center gap-2"
+                    className="flex-1 py-3 bg-[#1E40AF] hover:bg-[#1A368C] text-white rounded-lg font-semibold transition flex items-center justify-center gap-2"
                   >
                     <UploadCloud className="w-5 h-5" /> Continue
                   </button>

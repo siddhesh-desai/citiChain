@@ -6,7 +6,7 @@ const WelcomePage = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-[#0A0A23] to-[#1B235F] px-6 relative overflow-hidden text-white font-sans">
+<div className="min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-[#040D25] to-[#1E40AF] px-6 relative overflow-hidden text-white font-sans">
       {/* Floating glow backgrounds */}
       <div className="absolute -top-32 -left-32 w-96 h-96 bg-indigo-400 opacity-30 rounded-full blur-3xl animate-pulse"></div>
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-blue-700 opacity-30 rounded-full blur-3xl animate-pulse delay-1000"></div>
@@ -28,7 +28,12 @@ const WelcomePage = () => {
       </h1>
 
       {/* Glass Card */}
-      <div className="bg-white/10 backdrop-blur-xl border border-white/10 rounded-2xl p-10 text-center shadow-[0_20px_40px_rgba(0,0,0,0.4)] max-w-xl w-full z-10 animate-pulse-slow">
+<div
+  className="bg-white/10 backdrop-blur-xl border rounded-2xl p-10 text-center shadow-[0_0_12px_2px_rgba(99,102,241,0.6)] max-w-xl w-full z-10"
+  style={{
+    borderColor: "rgba(99,102,241,0.6)",
+  }}
+>
         <p className="text-white/70 text-lg md:text-xl mb-10 leading-relaxed">
           Your secure gateway to modern banking and financial services.
         </p>
@@ -49,23 +54,24 @@ const WelcomePage = () => {
           </button>
         </div>
 
-        {/* Admin Access */}
-        <div className="mb-4 text-sm text-white/60">
-          Are you a bank or institution?{" "}
-          <button
-onClick={() => navigate("/admin/login")}
-            className="underline hover:text-indigo-300 transition"
-          >
-            Bank Login
-          </button>{" "}
-          |{" "}
-          <button
-            onClick={() => navigate("/login/institution")}
-            className="underline hover:text-indigo-300 transition"
-          >
-            Institution Login
-          </button>
-        </div>
+{/* Admin Access */}
+<div className="mb-4 text-sm text-white/60">
+  Are you a bank or institution?{" "}
+  <button
+    onClick={() => navigate("/bank-login")}
+    className="underline hover:text-indigo-300 transition"
+  >
+    Bank Login
+  </button>{" "}
+  |{" "}
+<button
+  onClick={() => navigate("/institution/login")}
+  className="underline hover:text-indigo-300 transition"
+>
+  Institution Login
+</button>
+
+</div>
 
         <p className="text-white/50 text-sm mt-6">Trusted by 10M+ users worldwide</p>
       </div>
