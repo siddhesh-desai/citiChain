@@ -75,6 +75,16 @@ const WelcomePage = () => {
 
         <p className="text-white/50 text-sm mt-6">Trusted by 10M+ users worldwide</p>
       </div>
+{/* Passport Status CTA */}
+<div className="mt-12 text-center z-20">
+  <p className="text-white/60 text-base mb-2">Already applied for OneKYC?</p>
+  <button
+    onClick={() => navigate("/passport-status-entry")}
+    className="border border-indigo-400 text-indigo-100 px-6 py-2 rounded-full bg-white/10 hover:bg-indigo-600/30 backdrop-blur-md transition duration-300 hover:scale-105"
+  >
+    Check OneKYC Status
+  </button>
+</div>
 
       {/* Footer */}
       <div className="absolute bottom-4 text-white/30 text-xs">
