@@ -8,6 +8,8 @@ export default function Signup() {
     name: "",
     email: "",
     phone: "",
+    aadhar: "",
+  pan: "",
     otp: "",
     password: "",
     confirmPassword: "",
@@ -23,17 +25,21 @@ export default function Signup() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (
-      !form.email.includes("@") ||
-      form.password.length < 8 ||
-      form.password !== form.confirmPassword ||
-      form.phone.length < 10 ||
-      form.otp.length < 4 ||
-      !form.acceptedTerms
-    ) {
-      setError("Please fill all fields correctly and accept the terms.");
-      return;
-    }
+  if (
+  !form.email.includes("@") ||
+  form.password.length < 8 ||
+  form.password !== form.confirmPassword ||
+  form.phone.length < 10 ||
+  form.otp.length < 4 ||
+  form.aadhar.length !== 12 ||
+  !/^[0-9]{12}$/.test(form.aadhar) ||
+  !/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(form.pan.toUpperCase()) ||
+  !form.acceptedTerms
+) {
+  setError("Please fill all fields correctly and accept the terms.");
+  return;
+}
+
 
     setError("");
     alert("Signup successful!");
@@ -63,7 +69,12 @@ export default function Signup() {
           boxShadow: "0 0 20px 2px rgba(255,255,255,0.07)",
         }}
         animate={{ opacity: [0.15, 0.3, 0.15] }}
-        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 3 }}
+        transition={{
+          duration: 6,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: 3,
+        }}
       ></motion.div>
 
       <div className="max-w-7xl w-full flex flex-col md:flex-row items-center md:items-center justify-center gap-24 z-10">
@@ -91,12 +102,15 @@ export default function Signup() {
           }}
         >
           <h2 className="text-4xl font-extrabold text-center text-white drop-shadow-lg tracking-wide">
-            Create your <span className="text-indigo-400">CitiChain</span> account
+            Create your <span className="text-indigo-400">CitiChain</span>{" "}
+            account
           </h2>
 
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
-              <label className="text-sm font-medium text-white/80">Full Name</label>
+              <label className="text-sm font-medium text-white/80">
+                Full Name
+              </label>
               <input
                 type="text"
                 name="name"
@@ -110,27 +124,31 @@ export default function Signup() {
 
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-medium text-white/80">Email</label>
+                <label className="text-sm font-medium text-white/80">
+                  Aadhar Number
+                </label>
                 <input
-                  type="email"
-                  name="email"
-                  placeholder="you@example.com"
-                  value={form.email}
+                  type="text"
+                  name="aadhar"
+                  placeholder="123456789012"
+                  value={form.aadhar}
                   onChange={handleChange}
                   required
                   className="mt-1 w-full p-3 rounded-lg bg-white/20 text-white placeholder-white/60 border border-white/30 focus:outline-none focus:ring-2 focus:ring-indigo-400"
                 />
               </div>
               <div>
-                <label className="text-sm font-medium text-white/80">Phone</label>
+                <label className="text-sm font-medium text-white/80">
+                  PAN Number
+                </label>
                 <input
-                  type="tel"
-                  name="phone"
-                  placeholder="+91 98765 43210"
-                  value={form.phone}
+                  type="text"
+                  name="pan"
+                  placeholder="ABCDE1234F"
+                  value={form.pan}
                   onChange={handleChange}
                   required
-                  className="mt-1 w-full p-3 rounded-lg bg-white/20 text-white placeholder-white/60 border border-white/30 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                  className="mt-1 w-full p-3 rounded-lg bg-white/20 text-white placeholder-white/60 border border-white/30 focus:outline-none focus:ring-2 focus:ring-indigo-400 uppercase"
                 />
               </div>
             </div>
@@ -161,7 +179,9 @@ export default function Signup() {
 
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-medium text-white/80">Password</label>
+                <label className="text-sm font-medium text-white/80">
+                  Password
+                </label>
                 <input
                   type="password"
                   name="password"
@@ -173,7 +193,9 @@ export default function Signup() {
                 />
               </div>
               <div>
-                <label className="text-sm font-medium text-white/80">Confirm Password</label>
+                <label className="text-sm font-medium text-white/80">
+                  Confirm Password
+                </label>
                 <input
                   type="password"
                   name="confirmPassword"
@@ -197,7 +219,9 @@ export default function Signup() {
               <label className="text-sm">I accept the Terms & Conditions</label>
             </div>
 
-            {error && <p className="text-sm text-red-400 text-center">{error}</p>}
+            {error && (
+              <p className="text-sm text-red-400 text-center">{error}</p>
+            )}
 
             <motion.button
               whileHover={{ scale: 1.05 }}
@@ -210,7 +234,10 @@ export default function Signup() {
 
             <p className="text-center text-sm text-white/60">
               Already have an account?{" "}
- <Link to="/login/user" className="text-indigo-300 hover:underline font-medium">
+              <Link
+                to="/login/user"
+                className="text-indigo-300 hover:underline font-medium"
+              >
                 Login
               </Link>
             </p>
