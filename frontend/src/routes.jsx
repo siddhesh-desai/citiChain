@@ -2,9 +2,9 @@ import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 
 import Signup from "./components/Signup";
-import Login from "./components/Login";            // Single login component
+import Login from "./components/Login";            
 import OTPVerify from "./components/OTPVerify";
-import TransferMoneyPage from "./components/TransferMoneyPage"; // ✅ correct path
+import TransferMoneyPage from "./components/TransferMoneyPage"; 
 import Dashboard from "./components/Dashboard";
 import KYCStatus from "./pages/KYCStatus"; 
 
@@ -15,12 +15,14 @@ import KYCLivePhoto from "./components/KYCLivePhoto";
 import KYCReview from "./components/KYCReview";
 import KYCAddress from "./components/KYCAddress";
 import KYCDeclaration from "./components/KYCDeclaration";
-import KYCDetails from "./components/KYCDetails"; // Basic Details
+import KYCDetails from "./components/KYCDetails"; 
 import WelcomePage from "./pages/WelcomePage";
+import PassportStatusPage from "./components/PassportStatusPage"; 
+import PassportStatusEntry from "./components/PassportStatusEntry";
 
 //passport 
 
-import ReputationPassport from "./components/ReputationPassport"; // adjust path as needed
+import ReputationPassport from "./components/ReputationPassport"; 
 import SmartLoanPage from "./components/SmartLoanPage";
 import TokenizedLendingPage from "./components/TokenizedLendingPage";
 import RupeeXStablecoinPage from "./components/RupeeXStablecoinPage";
@@ -32,7 +34,7 @@ import BankLoginPage from "./components/BankLoginPage";
 import BankDashboard from "./pages/BankDashboard";
 //institute
 import InstitutionLogin from "./components/InstitutionLogin";
-import InstitutionDashboard from "./components/InstitutionDashboard"; // adjust the path based on your file structure
+import InstitutionDashboard from "./components/InstitutionDashboard";
 
 
 // Placeholder components for Cards and Statements
@@ -68,6 +70,9 @@ const AppRoutes = () => (
     <Route path="/kyc/declaration" element={<KYCDeclaration />} />
     <Route path="/kyc/review" element={<KYCReview />} />
 <Route path="/kyc/status" element={<KYCStatus />} />
+<Route path="/passport-status-page" element={<PassportStatusPage />} />
+<Route path="/passport-status-entry" element={<PassportStatusEntry />} />
+
 {/*passport*/}
 <Route path="/passport" element={<ReputationPassport />} />
 <Route path="/smart-loan" element={<SmartLoanPage />} />
