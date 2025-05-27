@@ -42,12 +42,6 @@ const userSchema = mongoose.Schema(
       type: String,
       default: "individual",
     },
-    accounts: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Account",
-      },
-    ],
     goverment_ids: {
       aadhaar_number: {
         type: String,
@@ -75,9 +69,6 @@ const userSchema = mongoose.Schema(
       enum: ["pending", "approved", "rejected"],
       default: "pending",
     },
-    passport_number: {
-      type: String,
-    },
     password: {
       type: String,
       required: true,
@@ -89,6 +80,21 @@ const userSchema = mongoose.Schema(
       unique: true,
       sparse: true,
     },
+    kyc_approved_date: {
+      type: Date,
+    },
+    admin_notes: {
+      type: String,
+    },
+    wallet_address: {
+      type: String,
+      required: false,
+    },
+
+    private_key: {
+      type: String,
+      required: false,
+    },
 
     refreshToken: {
       type: String,
@@ -98,9 +104,10 @@ const userSchema = mongoose.Schema(
 );
 
 userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
+  if (this.isModified("password")) {
+    this.password = await bcrypt.hash(this.password, 10);
+  }
 
-  this.password = await bcrypt.hash(this.password, 10);
   next();
 });
 

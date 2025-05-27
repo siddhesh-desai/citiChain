@@ -141,7 +141,9 @@ const registerUser = async (req, res) => {
     throw new Error(pan_verification.message);
   }
 
-  const live_photo_LocalPath = req.file["live_photo"][0].path;
+  // live photo
+
+  const live_photo_LocalPath = req.files?.live_photo?.[0]?.path;
 
   if (!live_photo_LocalPath) {
     throw new ApiError(400, "Live photo is required");
@@ -152,6 +154,19 @@ const registerUser = async (req, res) => {
   if (!live_photo) {
     throw new ApiError(400, "Live photo uploading failed");
   }
+
+  const signature_LocalPath = req.files?.signature?.[0]?.path;
+
+  if (!signature_LocalPath) {
+    throw new ApiError(400, "Signature is required");
+  }
+
+  const signature = await uploadOnClaudinary(signature_LocalPath);
+
+  if (!signature) {
+    throw new ApiError(400, "Signature uploading failed");
+  }
+
   // generate a passport number
 
   // create user object
@@ -168,11 +183,19 @@ const registerUser = async (req, res) => {
       pan_number,
     },
     live_photo: live_photo.url,
+    signature: signature.url,
+    kyc_status: "pending",
   });
 
   const createdUser = await User.findById(user._id).select("-password");
 
   return res.status(201).json(createdUser);
+};
+
+const generateOneKYCPassport = () => {
+  const timestamp = Date.now().toString(36);
+  const random = Math.random().toString(36).substr(2, 5);
+  return `ONEKYC${timestamp}${random}`.toUpperCase();
 };
 
 const loginUser = asyncHandler(async (req, res) => {
@@ -302,4 +325,34 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
   }
 });
 
-export { registerUser, loginUser, logoutUser, refreshAccessToken };
+const approveUserKYC = asyncHandler(async (req, res) => {
+  const { user_id } = req.params;
+  if (!user_id) {
+    throw new ApiError(400, "User id is required");
+  }
+  const user = await User.findById(user_id);
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+  if (user.kyc_status === "approved") {
+    throw new ApiError(400, "User KYC is already approved");
+  }
+
+  const oneKYC_user_passport = generateOneKYCPassport();
+
+  const updatedUser = await User.findByIdAndUpdate(user_id, {
+    $set: {
+      oneKYC_user_passport,
+      kyc_status: "approved",
+    },
+  });
+
+  return res.status(200).json(updatedUser).select("-password -refreshToken");
+});
+export {
+  registerUser,
+  loginUser,
+  logoutUser,
+  refreshAccessToken,
+  approveUserKYC,
+};
