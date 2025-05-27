@@ -95,11 +95,21 @@ export default function KYCUpload() {
   const handleContinue = () => {
     if (!allRequiredUploaded) return;
     localStorage.setItem("kyc_docs", JSON.stringify(ocrData));
+    console.log("KYC documents ready:", ocrData);
+
+    // Add a json to previously stored user data
+    const userData = JSON.parse(localStorage.getItem("user")) || {};
+    userData.document_links = {
+      "pan": "https://example.com/pan.jpg",
+      "aadhar": "https://example.com/aadhar.jpg"
+    }
+    localStorage.setItem("user", JSON.stringify(userData));
+    console.log("Updated user data with document links:", userData);
     navigate("/kyc/photo");
   };
 
   return (
-<div className="min-h-screen bg-gradient-to-br from-[#1E40AF] via-[#3B82F6] to-[#1E40AF] text-white flex items-center justify-center px-6 py-12">
+    <div className="min-h-screen bg-gradient-to-br from-[#1E40AF] via-[#3B82F6] to-[#1E40AF] text-white flex items-center justify-center px-6 py-12">
       <div className="w-full max-w-3xl bg-white/10 border border-white/10 backdrop-blur-xl rounded-3xl p-10 shadow-2xl">
         <h1 className="text-2xl font-semibold text-center mb-1">Upload Your KYC Documents</h1>
         <p className="text-sm text-center text-white/70 mb-6">
@@ -109,7 +119,7 @@ export default function KYCUpload() {
         <div className="grid md:grid-cols-2 gap-6">
           {requiredDocs.map(({ id, label, required }) => (
             <div key={id} className="bg-white/10 p-5 rounded-2xl border-2 border-white/30 hover:border-indigo-500 hover:bg-white/20 transition-all duration-300 cursor-pointer min-h-[130px] flex flex-col justify-center items-center text-center"
-                 onClick={() => openFileDialog(id)}
+              onClick={() => openFileDialog(id)}
             >
               {!documents[id] ? (
                 <>
@@ -118,7 +128,7 @@ export default function KYCUpload() {
                   <p className="text-xs text-white/50 mt-1">Click to upload</p>
                 </>
               ) : (
-<p className="text-sm truncate font-semibold text-[#1E40AF]">{documents[id].name}</p>
+                <p className="text-sm truncate font-semibold text-[#1E40AF]">{documents[id].name}</p>
               )}
 
               <input
@@ -126,21 +136,21 @@ export default function KYCUpload() {
                 accept=".jpg,.jpeg,.png,.pdf"
                 ref={(el) => (inputRefs.current[id] = el)}
                 className="hidden"
-onChange={(e) => {
-  if (e.target.files && e.target.files[0]) {
-    handleFileUpload(id, e.target.files[0]);
-  }
-}}
+                onChange={(e) => {
+                  if (e.target.files && e.target.files[0]) {
+                    handleFileUpload(id, e.target.files[0]);
+                  }
+                }}
               />
-            {loadingDoc === id && (
-  <p className="mt-2 text-white text-sm">Parsing with AI…</p>
-)}
-{ocrData[id] && !loadingDoc && !errors[id] && (
-  <p className="mt-2 text-white text-sm select-text truncate max-w-full">OCR Done!</p>
-)}
-{errors[id] && (
-  <p className="text-white text-sm mt-1 font-semibold">{errors[id]}</p>
-)}
+              {loadingDoc === id && (
+                <p className="mt-2 text-white text-sm">Parsing with AI…</p>
+              )}
+              {ocrData[id] && !loadingDoc && !errors[id] && (
+                <p className="mt-2 text-white text-sm select-text truncate max-w-full">OCR Done!</p>
+              )}
+              {errors[id] && (
+                <p className="text-white text-sm mt-1 font-semibold">{errors[id]}</p>
+              )}
 
             </div>
           ))}
@@ -149,13 +159,10 @@ onChange={(e) => {
         <button
           onClick={handleContinue}
           disabled={!allRequiredUploaded}
-className={`mt-8 w-full py-3 rounded-xl font-semibold tracking-wide transition duration-300 text-white ${
-  allRequiredUploaded
-    ? "bg-[#1E40AF] hover:bg-[#3B82F6] cursor-pointer"
-    : "bg-gray-500 cursor-not-allowed text-white/70"
-}`}
-
-
+          className={`mt-8 w-full py-3 rounded-xl font-semibold tracking-wide transition duration-300 text-white ${allRequiredUploaded
+            ? "bg-[#1E40AF] hover:bg-[#3B82F6] cursor-pointer"
+            : "bg-gray-500 cursor-not-allowed text-white/70"
+            }`}
         >
           Continue to Live Photo →
         </button>

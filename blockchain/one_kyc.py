@@ -242,6 +242,16 @@ def get_kyc_status(passport_id: str):
 
 # FastAPI app initialization
 app = FastAPI()
+# Alloow CORS for all origins (for development purposes)
+from fastapi.middleware.cors import CORSMiddleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allow all origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all methods
+    allow_headers=["*"],  # Allow all headers
+)
+
 
 @app.post("/kyc/register")
 def register_user(user: UserCreate):

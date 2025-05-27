@@ -37,7 +37,10 @@ export default function Signup() {
 
     setError("");
     alert("Signup successful!");
-    navigate("/login");
+    // save user data in browser to be accessed later
+    localStorage.setItem("user", JSON.stringify(form));
+    console.log("User data saved:", form);
+    navigate("/kyc/start");
   };
 
   return (

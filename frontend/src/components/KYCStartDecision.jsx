@@ -42,16 +42,16 @@ export default function KYCStartDecision() {
               className="w-full py-3 flex items-center justify-center gap-2 bg-[#1E40AF] hover:bg-[#163c8d] text-white font-semibold rounded-xl transition duration-200"
             >
               <ShieldCheck className="w-5 h-5" />
-              Start New KYC
+              Start KYC
             </button>
 
-            <button
+            {/* <button
               onClick={skipKYC}
               className="w-full py-3 flex items-center justify-center gap-2 bg-blue-100 hover:bg-blue-200 text-[#1E40AF] font-semibold rounded-xl transition duration-200"
             >
               <SkipForward className="w-5 h-5" />
               Skip KYC for Now
-            </button>
+            </button> */}
 
             <button
               onClick={viewStatus}
