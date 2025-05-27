@@ -176,6 +176,7 @@ const registerUser = async (req, res) => {
       password: password,
       mobile: phone_number,
       dob: user_dob,
+      address: "N/A",
       document_links: {
         live_photo: "live_photo",
         signature: "signature",
@@ -197,6 +198,8 @@ const registerUser = async (req, res) => {
         body: JSON.stringify(requestBody),
       });
 
+      console.log("Response:", response);
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(
@@ -205,14 +208,15 @@ const registerUser = async (req, res) => {
       }
 
       const responseData = await response.json();
+      console.log("Response Data:", responseData);
 
       return responseData;
     } catch (error) {
-      console.error("Registration failed:", error.message);
+      throw new Error(`Registration failed: ${error.message}`);
     }
   };
 
-  const response_data = registerUserr();
+  const response_data = await registerUserr();
   if (!response_data) {
     throw new ApiError(500, "Failed to register user on the blockchain");
   }
@@ -233,11 +237,11 @@ const registerUser = async (req, res) => {
     live_photo: live_photo.url,
     signature: signature.url,
     kyc_status: "pending",
-    db_id: response_data?._id || null, // Assuming the response contains a db_id
-    data_hash: response_data?.data_hash || null,
-    wallet_address: response_data?.wallet_address || null,
-    wallet_private_key: response_data?.wallet_private_key || null,
-    zkp_address: response_data?.zkp_address || null,
+    db_id: response_data.user?._id || null, // Assuming the response contains a db_id
+    data_hash: response_data.user?.data_hash || null,
+    wallet_address: response_data.user?.wallet_address || null,
+    wallet_private_key: response_data.user?.wallet_private_key || null,
+    zkp_address: response_data.user?.zkp_address || null,
   });
 
   // // create user object
