@@ -244,24 +244,6 @@ const registerUser = async (req, res) => {
     zkp_address: response_data.user?.zkp_address || null,
   });
 
-  // // create user object
-
-  // const user = await User.create({
-  //   fullname,
-  //   email,
-  //   password,
-  //   username: username.toLowerCase(),
-  //   user_dob,
-  //   phone_number,
-  //   goverment_ids: {
-  //     aadhaar_number,
-  //     pan_number,
-  //   },
-  //   live_photo: live_photo.url,
-  //   signature: signature.url,
-  //   kyc_status: "pending",
-  // });
-
   const createdUser = await User.findById(user._id).select("-password");
 
   return res.status(201).json(createdUser);
