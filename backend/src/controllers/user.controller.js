@@ -395,21 +395,121 @@ const approveUserKYC = asyncHandler(async (req, res) => {
     throw new ApiError(400, "User KYC is already approved");
   }
 
-  const oneKYC_user_passport = generateOneKYCPassport();
+  const approve_user_on_chain = async () => {
+    const requestBody = {
+      _id: user.db_id,
+      reason: "KYC approved by admin",
+    };
+
+    //fetch url from env
+    const FASTAPI_BASE_URL =
+      process.env.FASTAPI_BASE_URL || "http://localhost:8001";
+
+    try {
+      const response = await fetch(`${FASTAPI_BASE_URL}/kyc/approve`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          `Error ${response.status}: ${JSON.stringify(errorData)}`
+        );
+      }
+
+      const responseData = await response.json();
+      return responseData;
+    } catch (error) {
+      throw new Error(`KYC approval failed: ${error.message}`);
+    }
+  };
+
+  const response_data = await approve_user_on_chain();
+  if (!response_data) {
+    throw new ApiError(500, "Failed to approve user KYC on the blockchain");
+  }
+
+
+  // const oneKYC_user_passport = generateOneKYCPassport();
 
   const updatedUser = await User.findByIdAndUpdate(user_id, {
     $set: {
-      oneKYC_user_passport,
+      zkp_address: response_data?.tx_hash || null,
+      oneKYC_user_passport: response_data?.one_kyc_number || null,
       kyc_status: "approved",
     },
   });
 
   return res.status(200).json(updatedUser).select("-password -refreshToken");
 });
+
+const declineUserKYC = asyncHandler(async (req, res) => {
+  const { user_id } = req.params;
+  if (!user_id) {
+    throw new ApiError(400, "User id is required");
+  }
+  const user = await User.findById(user_id);
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+  if (user.kyc_status === "rejected") {
+    throw new ApiError(400, "User KYC is already rejected");
+  }
+
+  const decline_user_on_chain = async () => {
+    const requestBody = {
+      _id: user.db_id,
+      reason: "KYC rejected by admin",
+    };
+
+    //fetch url from env
+    const FASTAPI_BASE_URL =
+      process.env.FASTAPI_BASE_URL || "http://localhost:8001";
+
+    try {
+      const response = await fetch(`${FASTAPI_BASE_URL}/kyc/reject`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          `Error ${response.status}: ${JSON.stringify(errorData)}`
+        );
+      }
+
+      const responseData = await response.json();
+      return responseData;
+    } catch (error) {
+      throw new Error(`KYC rejection failed: ${error.message}`);
+    }
+  }
+
+  const updatedUser = await User.findByIdAndUpdate(user_id, {
+    $set: {
+      kyc_status: "rejected",
+      oneKYC_user_passport: null,
+      tx_hash: null,
+    },
+  });
+
+  return res.status(200).json(updatedUser).select("-password -refreshToken");
+}
+);
+
 export {
   registerUser,
   loginUser,
   logoutUser,
   refreshAccessToken,
   approveUserKYC,
+  declineUserKYC,
 };

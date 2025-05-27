@@ -5,6 +5,7 @@ import {
   logoutUser,
   refreshAccessToken,
   approveUserKYC,
+  declineUserKYC,
 } from "../controllers/user.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
@@ -27,5 +28,6 @@ router.route("/login").post(loginUser);
 router.route("/logout").post(verifyJWT, logoutUser);
 router.route("/refresh-token").post(refreshAccessToken);
 router.route("/approve-kyc/:user_id").patch(approveUserKYC);
+router.route("/reject-kyc/:user_id").patch(declineUserKYC);
 
 export default router;

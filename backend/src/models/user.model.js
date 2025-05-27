@@ -74,8 +74,6 @@ const userSchema = mongoose.Schema(
       required: true,
       trim: true,
     },
-    
-
     oneKYC_user_passport: {
       type: String,
       unique: true,
