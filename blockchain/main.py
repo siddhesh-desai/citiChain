@@ -25,6 +25,7 @@ db = client[os.getenv("MONGO_DB")]
 users_collection = db["users"]
 transactions_collection = db["transactions"]
 kyc_collection = db["kyc_requests"]
+one_kyc_users = db["one_kyc_users"]
 
 # FastAPI App
 app = FastAPI()
@@ -230,10 +231,17 @@ def serialize_doc(doc):
 # SCHEMAS
 # ===========================
 
+from typing import Optional, Dict
+
 
 class KYCRequestCreate(BaseModel):
-    user_address: str
-    data_hash: str
+    name: Optional[str]
+    document_links: Optional[Dict[str, str]]  # aadhar, pan, photo
+    pan_number: Optional[str]
+    aadhar_number: Optional[str]
+    email: Optional[str]
+    mobile: Optional[str]
+    password: Optional[str]
 
 
 class KYCReview(BaseModel):
@@ -324,16 +332,107 @@ async def get_request_by_passport(passport_id: str):
 # FASTAPI ROUTES
 # ===========================
 
+from pydantic import BaseModel, Field
+from typing import Optional
+from bson import ObjectId
+
+
+class PyObjectId(ObjectId):
+    @classmethod
+    def __get_validators__(cls):
+        yield cls.validate
+
+    @classmethod
+    def validate(cls, v):
+        if not ObjectId.is_valid(v):
+            raise ValueError("Invalid ObjectId")
+        return ObjectId(v)
+
+
+class UserModel(BaseModel):
+    id: Optional[PyObjectId] = Field(alias="_id")
+    name: str
+    document_links: Optional[dict]
+    pan_number: str
+    aadhar_number: str
+    one_kyc_passport_number: Optional[str] = None
+    status: str = "Pending"
+    data_hash: Optional[str] = None
+    user_address: Optional[str] = None
+    email: Optional[str] = None
+    mobile: Optional[str]
+    password: Optional[str]
+    created_at: datetime = datetime.now()
+    private_key: Optional[str] = None
+    tx_hash: Optional[str] = None
+
+    class Config:
+        json_encoders = {ObjectId: str}
+        allow_population_by_field_name = True
+
 
 @app.post("/kyc/request")
 def request_kyc(payload: KYCRequestCreate):
-    tx_hash = submit_kyc(payload.user_address, payload.data_hash)
+
+    if not payload.aadhar_number or not payload.pan_number:
+        raise HTTPException(
+            status_code=400, detail="Aadhar number and PAN number are required"
+        )
+    
+    # Check if user already exists
+    existing_user = users_collection.find_one({"aadhar_number": payload.aadhar_number})
+    if existing_user:
+        raise HTTPException(
+            status_code=400, detail="User with this Aadhar number already exists"
+        )
+    
+    # Create user address on chain
+    acct = Account.create()
+    user_address = acct.address
+    private_key= acct.key.hex()
+    hash = w3.keccak(
+        text=f"{payload.name}{payload.document_links}{payload.pan_number}{payload.aadhar_number}{payload.email}{payload.mobile}"
+    ).hex()
+
+    tx_hash = submit_kyc(user_address, hash)
     kyc = KYCRequestModel(
-        user_address=payload.user_address, data_hash=payload.data_hash
+        user_address=user_address, data_hash=hash
     )
     save_request(kyc)
-    return {"msg": "KYC submitted", "tx_hash": tx_hash.hex()}
 
+
+    
+    # Create user model
+    user_fields = {
+        "name": payload.name,
+        "document_links": payload.document_links,
+        "pan_number": payload.pan_number,
+        "aadhar_number": payload.aadhar_number,
+        "email": payload.email,
+        "mobile": payload.mobile,
+        "password": payload.password,
+        "data_hash": hash,
+        "user_address": user_address,
+        "status": "Pending",
+        "one_kyc_passport_number": None,
+        "created_at": datetime.now(),
+        "private_key": private_key,
+        "tx_hash": tx_hash.hex(),
+    }
+
+    # Remove keys with None values
+    user_fields = {k: v for k, v in user_fields.items() if v is not None}
+    user = UserModel(**user_fields)
+
+    # Save user to database
+    result = users_collection.insert_one(user.dict())
+    
+    return {
+        "msg": "KYC request submitted successfully",
+        "user_address": user_address,
+        "tx_hash": tx_hash.hex(),
+        "user_id": str(result.inserted_id),
+    }
 
 @app.post("/kyc/approve")
 def approve(payload: KYCReview):
