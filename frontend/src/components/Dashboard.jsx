@@ -1,5 +1,8 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
+import { useNavigate } from "react-router-dom";
+
 import FloatingChatBot from "../components/FloatingChatBot";
 import {
   BanknotesIcon,
@@ -47,7 +50,6 @@ const mockUser = {
   ],
   rupeeXHistory: [
   { id: 1, type: "Sent", amount: -1250, to: "@edTechPro", date: "2025-05-25" },
-  { id: 2, type: "Received", amount: 5000, from: "@daoScholar", date: "2025-05-24" },
   { id: 3, type: "Staked", amount: -2000, date: "2025-05-23" },
   { id: 4, type: "Received", amount: 3500, from: "@devGuild", date: "2025-05-22" },
   { id: 5, type: "Sent", amount: -1800, to: "@neoBank", date: "2025-05-21" },
@@ -78,6 +80,13 @@ const pieData = [
 
 export default function Dashboard() {
   const [menuOpen, setMenuOpen] = useState(true);
+  const navigate = useNavigate();
+  const handleLogout = () => {
+    // Clear auth tokens, user data, etc.
+    localStorage.removeItem("authToken"); // example
+    // Redirect to login or landing page
+    navigate("/login");
+  };
 
   return (
     <div className="flex bg-white min-h-screen text-gray-900 font-sans relative">
@@ -91,9 +100,11 @@ export default function Dashboard() {
               <p className="text-xs text-indigo-300 truncate">Passport: {mockUser.passportNumber}</p>
             </div>
           )}
-          <button onClick={() => setMenuOpen(!menuOpen)} className="text-white focus:outline-none">
-            {menuOpen ? '<' : '>'}
-          </button>
+       
+<button onClick={() => setMenuOpen(!menuOpen)} className="text-white focus:outline-none">
+  {menuOpen ? <ChevronLeftIcon className="w-5 h-5" /> : <ChevronRightIcon className="w-5 h-5" />}
+</button>
+
         </div>
         <nav className="space-y-4">
           <Link to="/dashboard" className="flex items-center gap-3 px-4 py-2 hover:bg-white/10 rounded-xl"><BanknotesIcon className="w-5 h-5" />{menuOpen && "Dashboard"}</Link>
@@ -102,7 +113,8 @@ export default function Dashboard() {
           <Link to="/passport" className="flex items-center gap-3 px-4 py-2 hover:bg-white/10 rounded-xl"><ShieldCheckIcon className="w-5 h-5" />{menuOpen && "Passport"}</Link>
           <Link to="/smart-loan" className="flex items-center gap-3 px-4 py-2 hover:bg-white/10 rounded-xl"><BuildingLibraryIcon className="w-5 h-5" />{menuOpen && "Loan"}</Link>
           <Link to="/rupeex" className="flex items-center gap-3 px-4 py-2 hover:bg-white/10 rounded-xl"><CurrencyRupeeIcon className="w-5 h-5" />{menuOpen && "RupeeX Transfer"}</Link>
-          <button className="mt-6 flex items-center gap-3 px-4 py-2 hover:bg-red-600/10 text-red-300 rounded-xl"><ArrowRightOnRectangleIcon className="w-5 h-5" />{menuOpen && "Logout"}</button>
+          <button   onClick={handleLogout}
+ className="mt-6 flex items-center gap-3 px-4 py-2 hover:bg-red-600/10 text-red-300 rounded-xl"><ArrowRightOnRectangleIcon className="w-5 h-5" />{menuOpen && "Logout"}</button>
         </nav>
       </aside>
 
@@ -119,7 +131,7 @@ export default function Dashboard() {
           </div>
           <div className="bg-white border border-green-200 rounded-2xl p-6 flex items-center gap-3">
             <CheckBadgeIcon className="w-6 h-6 text-green-600" />
-            <span className="text-lg font-medium">ZKP Verified</span>
+            <span className="text-lg font-medium">KYC Verified</span>
           </div>
         </section>
 
@@ -149,18 +161,17 @@ export default function Dashboard() {
             </ResponsiveContainer>
           </div>
         </section>
-        <section className="bg-blue-50 border border-blue-300 rounded-2xl p-6 shadow max-w-full max-h-72 overflow-y-auto">
-  <p className="text-sm text-blue-600 font-semibold mb-2">Citi Loyalty Token</p>
-  <h2 className="text-3xl font-bold text-blue-700 mb-4">1,500 Coins</h2>
-  <div className="space-y-3">
+     <section className="bg-gradient-to-br from-blue-100 via-blue-50 to-white border border-blue-300 rounded-2xl p-6 shadow max-w-full max-h-72 overflow-y-auto">
+  <p className="text-xs uppercase tracking-wider font-bold text-blue-500 mb-1">Citi Loyalty Token</p>
+  <h2 className="text-3xl font-extrabold text-blue-700 mb-4">1,500 Coins</h2>
+<div className="space-y-3">
     {[
-      { id: 1, coins: 300, desc: "Completing KYC via AI OneKYC", date: "2025-05-20" },
-      { id: 2, coins: 200, desc: "Making payments with RupeeX", date: "2025-05-22" },
-      { id: 3, coins: 150, desc: "Taking and repaying Smart Loans on time", date: "2025-05-23" },
-      { id: 4, coins: 100, desc: "Engaging with citiGPT regularly", date: "2025-05-24" },
-      { id: 5, coins: 100, desc: "Referring other users or merchants", date: "2025-05-25" },
-      { id: 6, coins: 150, desc: "Participating in challenge: Save ₹5,000 in 30 days", date: "2025-05-26" },
-      { id: 7, coins: 500, desc: "Participating in challenge: Pay EMI on time for 3 months", date: "2025-05-27" },
+{ id: 1, coins: 300, desc: "Completed AI OneKYC with verified identity and facial match", date: "2025-05-20" },
+{ id: 2, coins: 250, desc: "Maintained average wallet balance above ₹10,000 for 30 days", date: "2025-05-22" },
+{ id: 3, coins: 200, desc: "Successfully repaid loan on schedule with no penalties", date: "2025-05-23" },
+{ id: 4, coins: 300, desc: "Referred and onboarded an active verified merchant", date: "2025-05-24" },
+{ id: 7, coins: 400, desc: "Used RupeeX to support education or healthcare via verified partners", date: "2025-05-27" },
+{ id: 6, coins: 500, desc: "Upgraded to Gold Tier with over ₹1,00,000 in transaction volume", date: "2025-05-26" }
     ].map((item) => (
       <div key={item.id} className="flex justify-between text-blue-800 font-medium bg-blue-100 rounded px-4 py-2 shadow-sm">
         <span>{item.desc}</span>
