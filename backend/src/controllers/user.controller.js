@@ -169,13 +169,61 @@ const registerUser = async (req, res) => {
 
   // on chain key push
 
+  const registerUserr = async () => {
+    const requestBody = {
+      name: fullname,
+      email: email,
+      password: password,
+      mobile: phone_number,
+      dob: user_dob,
+      document_links: {
+        live_photo: "live_photo",
+        signature: "signature",
+      },
+      pan_number: pan_number,
+      aadhar_number: aadhaar_number,
+    };
+
+    //fetch url from env
+    const FASTAPI_BASE_URL =
+      process.env.FASTAPI_BASE_URL || "http://localhost:8001";
+
+    try {
+      const response = await fetch(`${FASTAPI_BASE_URL}/kyc/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          `Error ${response.status}: ${JSON.stringify(errorData)}`
+        );
+      }
+
+      const responseData = await response.json();
+
+      return responseData;
+    } catch (error) {
+      console.error("Registration failed:", error.message);
+    }
+  };
+
+  const response_data = registerUserr();
+  if (!response_data) {
+    throw new ApiError(500, "Failed to register user on the blockchain");
+  }
+
   // create user object
 
   const user = await User.create({
     fullname,
     email,
     password,
-    username: username.toLowerCase(),
+    username,
     user_dob,
     phone_number,
     goverment_ids: {
@@ -185,7 +233,30 @@ const registerUser = async (req, res) => {
     live_photo: live_photo.url,
     signature: signature.url,
     kyc_status: "pending",
+    db_id: response_data?._id || null, // Assuming the response contains a db_id
+    data_hash: response_data?.data_hash || null,
+    wallet_address: response_data?.wallet_address || null,
+    wallet_private_key: response_data?.wallet_private_key || null,
+    zkp_address: response_data?.zkp_address || null,
   });
+
+  // // create user object
+
+  // const user = await User.create({
+  //   fullname,
+  //   email,
+  //   password,
+  //   username: username.toLowerCase(),
+  //   user_dob,
+  //   phone_number,
+  //   goverment_ids: {
+  //     aadhaar_number,
+  //     pan_number,
+  //   },
+  //   live_photo: live_photo.url,
+  //   signature: signature.url,
+  //   kyc_status: "pending",
+  // });
 
   const createdUser = await User.findById(user._id).select("-password");
 
