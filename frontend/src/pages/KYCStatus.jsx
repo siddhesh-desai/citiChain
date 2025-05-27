@@ -95,7 +95,12 @@ export default function KycDashboard() {
         setRedirectCountdown((prev) => {
           if (prev <= 1) {
             clearInterval(timer);
-            navigate("/dashboard");
+navigate("/passport-status-page", {
+  state: {
+    status: "accepted",
+passportNumber: passportGenerated,
+  },
+});
             return 0;
           }
           return prev - 1;
@@ -119,8 +124,8 @@ export default function KycDashboard() {
       alert("Please select both date and time.");
       return;
     }
-    const passport = Math.floor(100000 + Math.random() * 900000).toString();
-    setPassportGenerated(passport);
+   setPassportGenerated("scheduled");
+
   };
 
   return (
@@ -173,9 +178,7 @@ export default function KycDashboard() {
 
       {/* Demo Call Section */}
       <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-6 mb-12">
-        <h2 className="text-xl font-semibold mb-4 text-blue-800">
-          Demo Call
-        </h2>
+        <h2 className="text-xl font-semibold mb-4 text-blue-800">Demo Call</h2>
 
         {!demoCallOpen ? (
           <button
@@ -222,15 +225,12 @@ export default function KycDashboard() {
       {/* Schedule Verification Call Section */}
       <section className="max-w-5xl mx-auto bg-white shadow-lg rounded-lg p-6">
         <h2 className="text-xl font-bold mb-6 text-blue-800">
-          Schedule Verification Call (Indian Time Only)
+          Schedule Verification Call 
         </h2>
         <div className="flex flex-col md:flex-row gap-6 items-center">
           {/* Date input */}
           <div className="flex flex-col flex-1">
-            <label
-              htmlFor="date"
-              className="font-semibold mb-2 text-blue-700"
-            >
+            <label htmlFor="date" className="font-semibold mb-2 text-blue-700">
               Select Date (IST)
             </label>
             <input
@@ -246,10 +246,7 @@ export default function KycDashboard() {
 
           {/* Time slot dropdown */}
           <div className="flex flex-col flex-1">
-            <label
-              htmlFor="time"
-              className="font-semibold mb-2 text-blue-700"
-            >
+            <label htmlFor="time" className="font-semibold mb-2 text-blue-700">
               Select Time Slot (IST)
             </label>
             <select
@@ -285,14 +282,15 @@ export default function KycDashboard() {
 
         {/* Passport Display and Redirect */}
         {passportGenerated && (
-          <div className="mt-8 bg-blue-100 text-blue-900 p-4 rounded-md font-mono text-center text-lg shadow-inner">
-            <p>
-              Passport Generated:{" "}
-              <span className="font-bold">{passportGenerated}</span>
+          <div className="mt-8 bg-blue-100 text-blue-900 p-4 rounded-md font-sans text-center text-lg shadow-inner">
+            <p className="font-semibold">
+              Verification call scheduled for{" "}
+              <span className="underline">{scheduledDate}</span> at{" "}
+              <span className="underline">{scheduledTime} IST</span>.
             </p>
             <p className="mt-2 text-sm text-gray-700">
-              Redirecting to main dashboard in {redirectCountdown} second
-              {redirectCountdown !== 1 ? "s" : ""}...
+              Redirecting to verification status page in {redirectCountdown}{" "}
+              second{redirectCountdown !== 1 ? "s" : ""}...
             </p>
           </div>
         )}
