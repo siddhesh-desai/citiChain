@@ -90,8 +90,19 @@ const userSchema = mongoose.Schema(
       type: String,
       required: false,
     },
-
-    private_key: {
+    db_id: {
+      type: String,
+      required: false,
+    },
+    data_hash: {
+      type: String,
+      required: false,
+    },
+    wallet_private_key: {
+      type: String,
+      required: false,
+    },
+    zkp_address: {
       type: String,
       required: false,
     },
