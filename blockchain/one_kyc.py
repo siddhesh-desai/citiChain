@@ -44,6 +44,7 @@ import random
 import string
 from pydantic_core import core_schema
 from pydantic import GetCoreSchemaHandler
+from fastapi.middleware.cors import CORSMiddleware
 
 
 class PyObjectId(ObjectId):
@@ -111,6 +112,68 @@ class UpdateStatus(BaseModel):
     id: PyObjectId = Field(..., alias="_id")
     reason: Optional[str] = None  # Reason for decline, if any
 
+# RupeeX Schemas
+class RupeeXUser(BaseModel):
+    id: Optional[PyObjectId] = Field(alias="_id")
+    name: str
+    email: str
+    mobile: str
+    password: str
+    one_kyc_number: Optional[str] = None  # Unique identifier for One KYC
+    bank: Optional[str] = None  # Bank name
+    wallet_address: Optional[str] = None  # Blockchain wallet address
+    wallet_private_key: Optional[str] = None  # Private key for the wallet
+    created_at: Optional[str] = None  # Timestamp of creation
+
+    class Config:
+        json_encoders = {
+            ObjectId: str
+        }
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+
+class RupeeXTransaction(BaseModel):
+    id: Optional[PyObjectId] = Field(alias="_id")
+    type: str  # e.g., "mint", "transfer"
+    to_user_id: str  # User ID to which RPX is sent
+    to_wallet_address: str  # Wallet address to which RPX is sent
+    from_user_id: Optional[str] = None  # User ID from which RPX is sent (if applicable)
+    from_wallet_address: Optional[str] = None  # Wallet address from which RPX is sent (if applicable)
+    amount: int  # Amount of RPX
+    tx_hash: str  # Transaction hash on the blockchain
+    created_at: Optional[str] = datetime.now().isoformat()  # Default to current time
+    unit: Optional[str] = "RPX"  # Unit of the transaction
+
+    class Config:
+        json_encoders = {
+            ObjectId: str
+        }
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+
+
+class RupeeXUserCreate(BaseModel):
+    name: str
+    email: str
+    mobile: str
+    password: str
+    one_kyc_number: str  # Unique identifier for One KYC
+    bank: Optional[str] = None  # Bank name
+    created_at: Optional[str] = datetime.now().isoformat()  # Default to current time
+
+class RupeeXUserLogin(BaseModel):
+    email: str
+    password: str
+
+class RupeeXMintRequest(BaseModel):
+    amount: int  # Amount of RPX to mint
+    to_user_id: str  # Address to mint RPX to
+
+class RupeeXTransferRequest(BaseModel):
+    amount: int  # Amount of RPX to transfer
+    from_user_id: str  # User ID from which RPX is sent
+    to_user_id: str  # User ID to which RPX is sent
+
 
 # Database setup
 load_dotenv()
@@ -120,6 +183,8 @@ db = mongo_client[os.getenv("MONGO_DB")]
 print("Collections in DB:", db.list_collection_names())
 
 onekyc_users_collection = db["onekyc_users"]
+transactions_collection = db["transactions"]
+users_collection = db["users"]
 
 # Blockchain setup 
 GANACHE_URL = os.getenv("GANACHE_URL")
@@ -130,13 +195,23 @@ if not w3.is_connected():
 
 # OneKYC Contract Setup
 ONE_KYC_CONTRACT_ADDRESS = Web3.to_checksum_address(os.getenv("ONEKYC_CONTRACT_ADDRESS"))
+RUPEEX_CONTRACT_ADDRESS = Web3.to_checksum_address(os.getenv("CONTRACT_ADDRESS"))
 
 with open("OneKYC_abi.json") as f:
     onekyc_abi = json.load(f)
 
+with open("RupeeX_abi.json") as f:
+    rupeex_abi = json.load(f)
+
 onekyc_contract = w3.eth.contract(address=ONE_KYC_CONTRACT_ADDRESS, abi=onekyc_abi)
+rupeex_contract = w3.eth.contract(address=RUPEEX_CONTRACT_ADDRESS, abi=rupeex_abi)
+
 default_account = w3.eth.accounts[0]
 w3.eth.default_account = default_account
+
+owner_address = w3.eth.accounts[0]
+owner_private_key = os.getenv("OWNER_PRIVATE_KEY")
+
 
 # OneKYC blockchain functions
 def create_wallet_on_chain():
@@ -146,19 +221,6 @@ def create_wallet_on_chain():
         "private_key": acct.key.hex(),
     }
     return user_data
-
-# def submit_kyc(user_address: str, data_hash: str, private_key: str):
-#     tx = onekyc_contract.functions.requestKYC(data_hash).build_transaction(
-#         {
-#             "from": user_address,
-#             "nonce": w3.eth.get_transaction_count(user_address),
-#             "gas": 300000,
-#             "gasPrice": w3.eth.gas_price,
-#         }
-#     )
-#     signed_tx = w3.eth.account.sign_transaction(tx, private_key=private_key)
-#     tx_hash = w3.eth.send_raw_transaction(signed_tx.rawTransaction)
-#     return tx_hash.hex()
 
 def fund_wallet(user_address: str, amount: float):
     PRIVATE_KEY_OF_FUNDED_ACCOUNT = os.getenv("PRIVATE_KEY_OF_FUNDED_ACCOUNT")
@@ -240,10 +302,11 @@ def get_kyc_status(passport_id: str):
 
     return status1 and status2
 
+# RupeeX blockchain functions
+
+
 # FastAPI app initialization
 app = FastAPI()
-# Alloow CORS for all origins (for development purposes)
-from fastapi.middleware.cors import CORSMiddleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Allow all origins
@@ -386,7 +449,6 @@ def get_kyc_status_endpoint(passport_id: str):
     except Exception as e:
         print(e)
         return {"status": False, "detail": "An error occurred while fetching KYC status"}
-    
 
 @app.get("/kyc/users/{user_id}")
 def get_user(user_id: str):
@@ -400,106 +462,241 @@ def get_user(user_id: str):
     user.pop("password", None)
     return {"user": user}
 
+# RupeeX User Endpoints
+@app.post("/rupeex/register")
+def register_rupeex_user(user: RupeeXUserCreate):
+    # Check if user already exists
+    existing_user = users_collection.find_one({
+        "$or": [
+            {"email": user.email},
+            {"mobile": user.mobile},
+            {"one_kyc_number": user.one_kyc_number}
+        ]
+    })
+    if existing_user:
+        raise HTTPException(status_code=400, detail="User already exists")
+
+    # Create user data
+    user_data = user.model_dump()
+    user_data["created_at"] = datetime.now().isoformat()
+
+    # Create a wallet on the blockchain
+    wallet_data = create_wallet_on_chain()
+    user_data["wallet_address"] = wallet_data["address"]
+    user_data["wallet_private_key"] = wallet_data["private_key"]
+
+    # Fund the wallet with 0.1 ether
+    try:
+        fund_wallet(user_data["wallet_address"], 0.1)  # Fund the wallet with 0.1 ether
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Blockchain transaction failed: {str(e)}")
+
+    # Insert into MongoDB
+    result = users_collection.insert_one(user_data)
+    user_data["_id"] = str(result.inserted_id)
+    user_data.pop("wallet_private_key", None)
+    user_data.pop("password", None)
+    user_data.pop("one_kyc_number", None)
+    return {"message": "User registered successfully", "user": user_data}
+
+@app.post("/rupeex/login")
+def login_rupeex_user(user: RupeeXUserLogin):
+    # Find user by email
+    existing_user = users_collection.find_one({"email": user.email})
+    if not existing_user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # Check password (in a real application, use hashed passwords)
+    if existing_user["password"] != user.password:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+
+    # Return user data excluding sensitive information
+    user_data = existing_user.copy()
+    user_data.pop("password", None)
+    user_data["_id"] = str(user_data["_id"])
+    user_data.pop("wallet_private_key", None)
+    return {"message": "Login successful", "user": user_data}
+
+@app.get("/rupeex/users")
+def list_rupeex_users():
+    users = list(users_collection.find({}))
+
+    for user in users:
+        user["_id"] = str(user["_id"])
+        user.pop("wallet_private_key", None)
+        user.pop("password", None)
+
+    return {"users": users}
+
+@app.get("/rupeex/users/{user_id}")
+def get_rupeex_user(user_id: str):
+    user = users_collection.find_one({"_id": ObjectId(user_id)})
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    user["_id"] = str(user["_id"])
+    user.pop("wallet_private_key", None)
+    user.pop("password", None)
+    return {"user": user}
+
+@app.get("/rupeex/balance/{user_id}")
+def get_rupeex_balance(user_id: str):
+    user = users_collection.find_one({"_id": ObjectId(user_id)})
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    wallet_address = user.get("wallet_address")
+    if not wallet_address:
+        raise HTTPException(status_code=400, detail="Wallet address not found for user")
+    
+    checksum_address = Web3.to_checksum_address(wallet_address)
+    balance = rupeex_contract.functions.balanceOf(checksum_address).call()
+    return {"wallet_address": checksum_address, "balance": balance, "unit": "RPX"}
+
+@app.post("/rupeex/mint")
+def mint_rupeex_tokens(mint_request: RupeeXMintRequest):
+    user = users_collection.find_one({"_id": ObjectId(mint_request.to_user_id)})
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    wallet_address = user.get("wallet_address")
+    if not wallet_address:
+        raise HTTPException(status_code=400, detail="Wallet address not found for user")
+    
+    try:
+        tx = rupeex_contract.functions.mint(wallet_address, mint_request.amount).build_transaction(
+            {
+                "from": owner_address,
+                "nonce": w3.eth.get_transaction_count(owner_address),
+                "gas": 200000,
+                "gasPrice": w3.to_wei("50", "gwei"),
+            }
+        )
+        signed_tx = w3.eth.account.sign_transaction(tx, private_key=owner_private_key)
+        tx_hash = w3.eth.send_raw_transaction(signed_tx.raw_transaction)
+
+        # Add transaction to MongoDB
+        transaction_data = {
+            "from_user_address":owner_address,
+            "type":"mint",
+            "to_user_id":mint_request.to_user_id,
+            "to_wallet_address":wallet_address,
+            "amount":mint_request.amount,
+            "tx_hash":tx_hash.hex(),
+            "created_at": datetime.now().isoformat(),
+            "unit": "RPX"
+        }
+
+        transactions_collection.insert_one(transaction_data)
+
+        return {"message": "Tokens minted successfully", "tx_hash": tx_hash.hex(), "amount": mint_request.amount}
+
+    except ValueError as e:
+        print(e)
+        raise HTTPException(status_code=400, detail=f"Blockchain transaction error: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Blockchain transaction failed: {str(e)}")
+    
+@app.post("/rupeex/transfer")
+def transfer_rupeex_tokens(transfer_request: RupeeXTransferRequest):
+    from_user = users_collection.find_one({"_id": ObjectId(transfer_request.from_user_id)})
+    to_user = users_collection.find_one({"_id": ObjectId(transfer_request.to_user_id)})
+
+    if not from_user or not to_user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    from_wallet_address = from_user.get("wallet_address")
+    to_wallet_address = to_user.get("wallet_address")
+
+    from_balance = get_rupeex_balance(transfer_request.from_user_id)
+    if from_balance["balance"] < transfer_request.amount:
+        raise HTTPException(status_code=400, detail="Insufficient balance for transfer")
+
+    if not from_wallet_address or not to_wallet_address:
+        raise HTTPException(status_code=400, detail="Wallet address not found for user")
+    
+    try:
+        tx = rupeex_contract.functions.transfer(to_wallet_address, transfer_request.amount).build_transaction(
+            {
+                "from": from_wallet_address,
+                "nonce": w3.eth.get_transaction_count(from_wallet_address),
+                "gas": 200000,
+                "gasPrice": w3.to_wei("50", "gwei"),
+            }
+        )
+        signed_tx = w3.eth.account.sign_transaction(tx, private_key=from_user["wallet_private_key"])
+        tx_hash = w3.eth.send_raw_transaction(signed_tx.raw_transaction)
+
+
+        transaction_data = {
+            "type":"transfer",
+            "from_user_id":transfer_request.from_user_id,
+            "from_wallet_address":from_wallet_address,
+            "to_user_id":transfer_request.to_user_id,
+            "to_wallet_address":to_wallet_address,
+            "amount":transfer_request.amount,
+            "tx_hash":tx_hash.hex(),
+            "created_at": datetime.now().isoformat(),
+            "unit": "RPX"
+        }
+
+        transactions_collection.insert_one(transaction_data)
+
+        return {"message": "Tokens transferred successfully", "tx_hash": tx_hash.hex(), "amount": transfer_request.amount}
+
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=f"Blockchain transaction error: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Blockchain transaction failed: {str(e)}")
+
+@app.get("/rupeex/transactions")
+def get_rupeex_transactions(sender: Optional[str] = None, receiver: Optional[str] = None, type: Optional[str] = None):
+
+    if type and type not in ["mint", "transfer"]:
+        raise HTTPException(status_code=400, detail="Invalid transaction type. Must be 'mint' or 'transfer'.")
+    
+    if sender and not ObjectId.is_valid(sender):
+        raise HTTPException(status_code=400, detail="Invalid sender ID format")
+    
+    if receiver and not ObjectId.is_valid(receiver):
+        raise HTTPException(status_code=400, detail="Invalid receiver ID format")
+    if sender and receiver and sender == receiver:
+        raise HTTPException(status_code=400, detail="Sender and receiver cannot be the same")
+    
+    
+    query = {}
+    if sender:
+        query["from_user_id"] = sender
+    if receiver:
+        query["to_user_id"] = receiver
+    if type:
+        query["type"] = type
+
+    transactions = list(transactions_collection.find(query))
+
+    for tx in transactions:
+        tx["_id"] = str(tx["_id"])
+
+    return {"transactions": transactions}
+
+@app.get("/rupeex/transactions/{transaction_id}")
+def get_rupeex_transaction(transaction_id: str):
+    if not ObjectId.is_valid(transaction_id):
+        raise HTTPException(status_code=400, detail="Invalid transaction ID format")
+
+    transaction = transactions_collection.find_one({"_id": ObjectId(transaction_id)})
+
+    if not transaction:
+        raise HTTPException(status_code=404, detail="Transaction not found")
+
+    transaction["_id"] = str(transaction["_id"])
+    return {"transaction": transaction}
+
 if __name__ == "__main__":
     import uvicorn
 
     uvicorn.run(app, host="0.0.0.0", port=8000)
 
-
-# #  Test the above apis
-
-# # 1. Register a user
-# code here
-
-# import requests
-# # 1. Register a user
-# def register_user():
-#     url = "http://localhost:8000/kyc/register"
-#     user_data = {
-#         "name": "John Doe",
-#         "email": "sW",
-#         "password": "password123",
-#         "mobile": "1234567890",
-#         "dob": "1990-01-01",
-#         "address": "123 Main St, City, Country",
-
-#         "document_links": {
-#             "pan": "https://example.com/pan.jpg",
-#             "aadhar": "https://example.com/aadhar.jpg"
-#         },
-#         "pan_number": "ABCDE1234F",
-#         "aadhar_number": "1234-5678-9012",
-#         "created_at": "2023-10-01T12:00:00Z"
-#     }
-#     response = requests.post(url, json=user_data)
-#     if response.status_code == 200:
-#         print("User registered successfully:", response.json())
-#     else:
-#         print("Failed to register user:", response.json())
-
-# # 2. Login a user
-
-# def login_user():
-#     url = "http://localhost:8000/kyc/login"
-#     login_data = {
-#         "email": "sW",
-#         "password": "password123"
-#     }
-#     response = requests.post(url, json=login_data)
-#     if response.status_code == 200:
-#         print("Login successful:", response.json())
-#     else:
-#         print("Failed to login:", response.json())
-
-# # 3. List all users
-
-# def list_users(status=None):
-#     url = "http://localhost:8000/kyc/users"
-#     params = {}
-#     if status:
-#         params["status"] = status
-#     response = requests.get(url, params=params)
-#     if response.status_code == 200:
-#         print("Users:", response.json())
-#     else:
-#         print("Failed to list users:", response.json())
-
-# # 4. Approve a user
-
-# def approve_user(user_id):
-#     url = "http://localhost:8000/kyc/approve"
-#     update_data = {
-#         "_id": user_id,
-#         "reason": "Approved after verification"
-#     }
-#     response = requests.post(url, json=update_data)
-#     if response.status_code == 200:
-#         print("User approved successfully:", response.json())
-#     else:
-#         print("Failed to approve user:", response.json())
-
-# # 5. Reject a user
-
-# def reject_user(user_id, reason=None):
-#     url = "http://localhost:8000/kyc/reject"
-#     update_data = {
-#         "_id": user_id,
-#         "reason": reason or "Rejected due to invalid documents"
-#     }
-#     response = requests.post(url, json=update_data)
-#     if response.status_code == 200:
-#         print("User rejected successfully:", response.json())
-#     else:
-#         print("Failed to reject user:", response.json())
-
-# # 6. Get KYC status
-# def get_kyc_status(passport_id):
-#     url = f"http://localhost:8000/kyc/status/{passport_id}"
-#     response = requests.get(url)
-#     if response.status_code == 200:
-#         print("KYC Status:", response.json())
-#     else:
-#         print("Failed to get KYC status:", response.json())
-
-# # 7. Get user details by ID
-# # 8. Get user details by passport ID
