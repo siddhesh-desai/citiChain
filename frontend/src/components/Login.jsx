@@ -5,7 +5,7 @@ import loginIllustration from "../assets/undraw_enter-password_1kl4.svg"; // you
 
 export default function Login() {
   const navigate = useNavigate();
-const [form, setForm] = useState({ passport: "", password: "" });
+  const [form, setForm] = useState({ passport: "", password: "" });
   const [error, setError] = useState("");
 
   const handleChange = (e) => {
@@ -14,16 +14,15 @@ const [form, setForm] = useState({ passport: "", password: "" });
 
   const handleSubmit = (e) => {
     e.preventDefault();
-   const passportRegex = /^CITI-\d{3}[A-Z]@\d{3}[A-Z]{2}$/;
-if (!passportRegex.test(form.passport) || form.password.length < 8)
- {
+    const passportRegex = /^CITI-\d{3}[A-Z]@\d{3}[A-Z]{2}$/;
+    if (!passportRegex.test(form.passport) || form.password.length < 8) {
       setError("Invalid credentials. Please try again.");
       return;
     }
 
     setError("");
     alert("Login successful!");
-    navigate("/kyc/start");
+    navigate("/dashboard");
   };
 
   return (

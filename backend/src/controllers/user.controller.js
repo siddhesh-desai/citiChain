@@ -69,7 +69,7 @@ const verifyPan = (pan_number, fullname, user_dob) => {
     return { verified: false, message: "Pan verification failed" };
   }
 };
-
+//user creation
 const registerUser = async (req, res) => {
   // get user details from frontend
   // validation- not empty
@@ -167,7 +167,7 @@ const registerUser = async (req, res) => {
     throw new ApiError(400, "Signature uploading failed");
   }
 
-  // generate a passport number
+  // on chain key push
 
   // create user object
 

@@ -13,6 +13,7 @@ import {
   DocumentTextIcon,
   AcademicCapIcon,
 } from "@heroicons/react/24/outline";
+import FloatingChatBot from "../components/FloatingChatbot";
 
 const Dashboard = () => {
   const [accountData, setAccountData] = useState(null);
@@ -549,6 +550,7 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
+        <FloatingChatBot />
       </div>
     </div>
   );

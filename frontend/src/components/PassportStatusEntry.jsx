@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import emailIllustration from "../assets/undraw_certification_i2m0.svg";
+// import emailIllustration from "../assets/undraw_certification_i2m0.svg";
 
 export default function PassportStatusEntry() {
   const navigate = useNavigate();
@@ -89,7 +89,10 @@ export default function PassportStatusEntry() {
             {step === 1 ? "Check Passport Status" : "Enter OTP"}
           </h2>
 
-          <form onSubmit={step === 1 ? handleNext : handleVerify} className="space-y-6">
+          <form
+            onSubmit={step === 1 ? handleNext : handleVerify}
+            className="space-y-6"
+          >
             {step === 1 && (
               <>
                 <div>
@@ -125,7 +128,9 @@ export default function PassportStatusEntry() {
 
             {step === 2 && (
               <div>
-                <label className="text-sm font-medium text-white/80">Enter OTP</label>
+                <label className="text-sm font-medium text-white/80">
+                  Enter OTP
+                </label>
                 <input
                   type="text"
                   name="otp"
@@ -139,7 +144,9 @@ export default function PassportStatusEntry() {
               </div>
             )}
 
-            {error && <p className="text-sm text-red-400 text-center">{error}</p>}
+            {error && (
+              <p className="text-sm text-red-400 text-center">{error}</p>
+            )}
 
             <motion.button
               whileHover={{ scale: 1.05 }}
