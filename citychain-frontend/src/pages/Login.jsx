@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
+import { useAuth } from "../context/AuthContext";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -9,6 +11,18 @@ const Login = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const { login, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Redirect if already authenticated
+  React.useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleChange = (e) => {
     setFormData({
@@ -20,14 +34,24 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError("");
+
+    console.log("Attempting login with:", formData); // Debug log
 
     try {
-      // Add your login API call here
-      console.log("Login data:", formData);
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const result = await login(formData);
+      console.log("Login result:", result); // Debug log
+
+      if (result.success) {
+        console.log("Login successful, redirecting to dashboard");
+        navigate("/dashboard", { replace: true });
+      } else {
+        setError(result.message || "Login failed");
+        console.error("Login failed:", result.message);
+      }
     } catch (error) {
       console.error("Login error:", error);
+      setError("An unexpected error occurred");
     } finally {
       setLoading(false);
     }
@@ -55,6 +79,12 @@ const Login = () => {
         </div>
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          {error && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+              <span className="block sm:inline">{error}</span>
+            </div>
+          )}
+
           <div className="space-y-4">
             <div>
               <label

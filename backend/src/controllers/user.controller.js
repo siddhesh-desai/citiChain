@@ -5,6 +5,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import uploadOnClaudinary from "../utils/claudinary.js";
+import jwt from "jsonwebtoken";
 
 const generateAccessAndRefreshToken = async (userID) => {
   try {
@@ -69,6 +70,7 @@ const verifyPan = (pan_number, fullname, user_dob) => {
     return { verified: false, message: "Pan verification failed" };
   }
 };
+
 //user creation
 const registerUser = async (req, res) => {
   // get user details from frontend
@@ -255,6 +257,8 @@ const generateOneKYCPassport = () => {
   return `ONEKYC${timestamp}${random}`.toUpperCase();
 };
 
+// login user
+
 const loginUser = asyncHandler(async (req, res) => {
   //req body = data
   //set username or email
@@ -306,6 +310,8 @@ const loginUser = asyncHandler(async (req, res) => {
     );
 });
 
+// logout user
+
 const logoutUser = asyncHandler(async (req, res) => {
   //clear cookies
   //clear refresh token from database
@@ -329,6 +335,8 @@ const logoutUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, "User logged out successfully"));
 });
 
+// refresh Refresh token
+
 const refreshAccessToken = asyncHandler(async (req, res) => {
   //get refresh token from cookie
   //verify refresh token
@@ -337,7 +345,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 
   try {
     const incomingRefreshToken =
-      req.cookies.refreshToken || reqbody.refreshToken;
+      req.cookies.refreshToken || req.body.refreshToken;
 
     if (!incomingRefreshToken) {
       throw new ApiError(
@@ -381,6 +389,8 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     throw new ApiError(401, error?.message, "invalid refresh token");
   }
 });
+
+//approve kyc
 
 const approveUserKYC = asyncHandler(async (req, res) => {
   const { user_id } = req.params;
@@ -433,7 +443,6 @@ const approveUserKYC = asyncHandler(async (req, res) => {
     throw new ApiError(500, "Failed to approve user KYC on the blockchain");
   }
 
-
   // const oneKYC_user_passport = generateOneKYCPassport();
 
   const updatedUser = await User.findByIdAndUpdate(user_id, {
@@ -447,6 +456,7 @@ const approveUserKYC = asyncHandler(async (req, res) => {
   return res.status(200).json(updatedUser).select("-password -refreshToken");
 });
 
+//decline KYC
 const declineUserKYC = asyncHandler(async (req, res) => {
   const { user_id } = req.params;
   if (!user_id) {
@@ -491,7 +501,7 @@ const declineUserKYC = asyncHandler(async (req, res) => {
     } catch (error) {
       throw new Error(`KYC rejection failed: ${error.message}`);
     }
-  }
+  };
 
   const updatedUser = await User.findByIdAndUpdate(user_id, {
     $set: {
@@ -502,8 +512,55 @@ const declineUserKYC = asyncHandler(async (req, res) => {
   });
 
   return res.status(200).json(updatedUser).select("-password -refreshToken");
-}
-);
+});
+
+// get the dashboard data
+
+const getDashboard = asyncHandler(async (req, res) => {
+  // req.user is available because of verifyJWT middleware
+  const user = await User.findById(req.user._id).select(
+    "-password -refreshToken -wallet_private_key"
+  );
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, { user }, "Dashboard data retrieved successfully")
+    );
+});
+
+const checkKYCStatus = asyncHandler(async (req, res) => {
+  const { oneKYC_user_passport } = req.params;
+
+  if (!oneKYC_user_passport) {
+    throw new ApiError(400, "oneKYC passport number is required");
+  }
+
+  // Find user by oneKYC passport number
+  const user = await User.findOne({
+    oneKYC_user_passport: oneKYC_user_passport,
+  }).select("kyc_status oneKYC_user_passport fullname");
+
+  if (!user) {
+    throw new ApiError(404, "User with this oneKYC passport number not found");
+  }
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        kyc_status: user.kyc_status,
+        oneKYC_user_passport: user.oneKYC_user_passport,
+        fullname: user.fullname,
+      },
+      "KYC status retrieved successfully"
+    )
+  );
+});
 
 export {
   registerUser,
@@ -512,4 +569,6 @@ export {
   refreshAccessToken,
   approveUserKYC,
   declineUserKYC,
+  getDashboard,
+  checkKYCStatus,
 };
