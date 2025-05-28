@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getAccountDetails } from "../services/accountDetails";
+import { getAccountDetails, getBalance, getnewAccountDetails} from "../services/accountDetails";
 import {
   CreditCardIcon,
   BanknotesIcon,
@@ -17,12 +17,13 @@ import FloatingChatBot from "../components/FloatingChatbot";
 
 const Dashboard = () => {
   const [accountData, setAccountData] = useState(null);
+  const [newAccountData, setNewAccountData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showBalance, setShowBalance] = useState(true);
   const [error, setError] = useState(null);
 
   // Mock data for new features
-  const [reputationScore] = useState(750);
+  const [reputationScore] = useState(0);
   const [activeLoan] = useState({
     amount: 500000,
     paid: 150000,
@@ -64,23 +65,65 @@ const Dashboard = () => {
     },
   ]);
 
-  useEffect(() => {
-    const fetchAccountData = async () => {
-      try {
-        const data = await getAccountDetails();
-        setAccountData(data);
-      } catch (error) {
-        console.error("Error fetching account data:", error);
-        setError("Failed to load account data");
-      } finally {
-        setLoading(false);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchAccountData = async () => {
+  //     try {
+  //       const data = await getAccountDetails();
+  //       setAccountData(data);
+  //     } catch (error) {
+  //       console.error("Error fetching account data:", error);
+  //       setError("Failed to load account data");
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
 
-    fetchAccountData();
-  }, []);
+  //   const fetchBalance = async () => {
+  //     try {
+  //       const balance = await getBalance();
+  //       if (accountData) {
+  //         setAccountData((prevData) => ({ 
+  //           ...prevData,
+  //           current_balance: balance,
+  //         }));
+  //       }
+  //     } catch (error) {
+  //       console.error("Error fetching balance:", error);
+  //       setError("Failed to load balance data");
+  //     }
+  //   };
+    
+  //   fetchAccountData();
+  //   fetchBalance();
+  // }, []);
 
   // Enhanced stats with reputation score
+  
+  useEffect(() => {
+  const fetchAllData = async () => {
+    try {
+      const [account, balance, details] = await Promise.all([
+        getAccountDetails(),
+        getBalance(),
+        getnewAccountDetails(),
+      ]);
+      setAccountData({
+        ...account,
+        current_balance: balance,
+      });
+      setNewAccountData(details);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setError("Failed to load account or balance data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchAllData();
+}, []);
+
+
   const stats = accountData
     ? [
         {
@@ -89,21 +132,21 @@ const Dashboard = () => {
             ? `₹${accountData.current_balance?.toLocaleString()}`
             : "₹••••••",
           icon: BanknotesIcon,
-          change: "+2.5%",
+          change: "+100%",
           changeType: "increase",
         },
         {
           name: "Monthly Income",
-          value: `₹${accountData.monthly_income?.toLocaleString()}`,
+          value: `₹${100 || accountData.monthly_income?.toLocaleString()}`,
           icon: ArrowUpIcon,
-          change: "+5.2%",
+          change: "+100%",
           changeType: "increase",
         },
         {
           name: "Reputation Score",
-          value: `${reputationScore}/1000`,
+          value: `${0 && reputationScore}/1000`,
           icon: ShieldCheckIcon,
-          change: "+15 pts",
+          change: "+0 pts",
           changeType: "increase",
         },
       ]
@@ -142,7 +185,7 @@ const Dashboard = () => {
             CitiChain Dashboard
           </h1>
           <p className="text-gray-600">
-            Welcome back, {accountData?.user_id?.fullname || "User"}! Your
+            Welcome back, {newAccountData.name || accountData?.user_id?.fullname || "User"}! Your
             blockchain banking overview.
           </p>
         </div>
@@ -237,13 +280,13 @@ const Dashboard = () => {
             <div className="space-y-2">
               <p className="text-sm opacity-90">Account Number</p>
               <p className="text-xl font-mono">
-                {accountData?.account_number || "**** **** **** ****"}
+                {newAccountData._id || accountData?.account_number || "**** **** **** ****"}
               </p>
               <div className="flex justify-between items-end mt-4">
                 <div>
                   <p className="text-sm opacity-90">Account Holder</p>
                   <p className="font-semibold">
-                    {accountData?.user_id?.fullname || "Account Holder"}
+                    {newAccountData.name || accountData?.user_id?.fullname || "Account Holder"}
                   </p>
                 </div>
                 <div>
@@ -255,9 +298,9 @@ const Dashboard = () => {
               </div>
               <div className="flex justify-between items-end mt-2">
                 <div>
-                  <p className="text-sm opacity-90">Account Type</p>
+                  <p className="text-sm opacity-90">Wallet Address</p>
                   <p className="font-semibold capitalize">
-                    {accountData?.account_type || "Savings"}
+                    {newAccountData.wallet_address || accountData?.account_type || "Savings"}
                   </p>
                 </div>
                 <div>
@@ -289,10 +332,10 @@ const Dashboard = () => {
                 <span>Soulbound NFT</span>
                 <span className="text-green-600">✓ Minted</span>
               </div>
-              <div className="flex justify-between text-sm">
+              {/* <div className="flex justify-between text-sm">
                 <span>DID Status</span>
                 <span className="text-green-600">✓ Active</span>
-              </div>
+              </div> */}
               <div className="flex justify-between text-sm">
                 <span>Financial Identity</span>
                 <span className="text-blue-600">Shareable</span>
