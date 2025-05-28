@@ -137,7 +137,7 @@ const Dashboard = () => {
         },
         {
           name: "Monthly Income",
-          value: `₹${100 || accountData.monthly_income?.toLocaleString()}`,
+          value: `₹${accountData.current_balance?.toLocaleString() || accountData.monthly_income?.toLocaleString()}`,
           icon: ArrowUpIcon,
           change: "+100%",
           changeType: "increase",

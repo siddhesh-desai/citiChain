@@ -65,7 +65,7 @@ export default function InstitutionDashboard() {
 
       {/* Main Content */}
       <main className="flex-1 p-8 z-10 overflow-y-auto">
-        <h2 className="text-4xl font-bold mb-2 text-white">Welcome, Institute Admin</h2>
+        <h2 className="text-4xl font-bold mb-2 text-white">Welcome!</h2>
         <p className="text-white/70 mb-10">
           Your decentralized control center to manage identity, credit, compliance, and smart loans.
         </p>
