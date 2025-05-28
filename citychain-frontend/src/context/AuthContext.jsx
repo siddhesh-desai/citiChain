@@ -21,8 +21,20 @@ export const AuthProvider = ({ children }) => {
     const userData = localStorage.getItem("userData");
 
     if (token && userData) {
-      setUser(JSON.parse(userData));
-      setIsAuthenticated(true);
+      try {
+        // Add try-catch to handle JSON parsing errors
+        const parsedUserData = JSON.parse(userData);
+        setUser(parsedUserData);
+        setIsAuthenticated(true);
+      } catch (error) {
+        console.error("Error parsing user data from localStorage:", error);
+        // Clear invalid data from localStorage
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("userData");
+        setUser(null);
+        setIsAuthenticated(false);
+      }
     }
     setLoading(false);
   }, []);
@@ -40,6 +52,7 @@ export const AuthProvider = ({ children }) => {
       const data = await response.json();
 
       if (response.ok) {
+        // Ensure we're storing valid JSON data
         localStorage.setItem("accessToken", data.data.accessToken);
         localStorage.setItem("refreshToken", data.data.refreshToken);
         localStorage.setItem("userData", JSON.stringify(data.data.user));
@@ -51,6 +64,7 @@ export const AuthProvider = ({ children }) => {
         return { success: false, message: data.message };
       }
     } catch (error) {
+      console.error("Login error:", error);
       return { success: false, message: "Network error occurred" };
     }
   };
@@ -59,15 +73,18 @@ export const AuthProvider = ({ children }) => {
     try {
       const token = localStorage.getItem("accessToken");
 
-      await fetch("http://localhost:8000/api/v1/users/logout", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      if (token) {
+        await fetch("http://localhost:8000/api/v1/users/logout", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+      }
     } catch (error) {
       console.error("Logout error:", error);
     } finally {
+      // Always clear localStorage regardless of API call success
       localStorage.removeItem("accessToken");
       localStorage.removeItem("refreshToken");
       localStorage.removeItem("userData");

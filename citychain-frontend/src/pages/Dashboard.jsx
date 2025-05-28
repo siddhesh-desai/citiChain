@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { getAccountDetails, getBalance, getnewAccountDetails} from "../services/accountDetails";
+import { Link } from "react-router-dom";
+import { getAccountDetails } from "../services/accountDetails";
 import {
   CreditCardIcon,
   BanknotesIcon,
@@ -82,7 +83,7 @@ const Dashboard = () => {
   //     try {
   //       const balance = await getBalance();
   //       if (accountData) {
-  //         setAccountData((prevData) => ({ 
+  //         setAccountData((prevData) => ({
   //           ...prevData,
   //           current_balance: balance,
   //         }));
@@ -92,37 +93,36 @@ const Dashboard = () => {
   //       setError("Failed to load balance data");
   //     }
   //   };
-    
+
   //   fetchAccountData();
   //   fetchBalance();
   // }, []);
 
   // Enhanced stats with reputation score
-  
+
   useEffect(() => {
-  const fetchAllData = async () => {
-    try {
-      const [account, balance, details] = await Promise.all([
-        getAccountDetails(),
-        getBalance(),
-        getnewAccountDetails(),
-      ]);
-      setAccountData({
-        ...account,
-        current_balance: balance,
-      });
-      setNewAccountData(details);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      setError("Failed to load account or balance data");
-    } finally {
-      setLoading(false);
-    }
-  };
+    const fetchAllData = async () => {
+      try {
+        const [account, balance, details] = await Promise.all([
+          getAccountDetails(),
+          getBalance(),
+          getnewAccountDetails(),
+        ]);
+        setAccountData({
+          ...account,
+          current_balance: balance,
+        });
+        setNewAccountData(details);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setError("Failed to load account or balance data");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  fetchAllData();
-}, []);
-
+    fetchAllData();
+  }, []);
 
   const stats = accountData
     ? [
@@ -185,8 +185,9 @@ const Dashboard = () => {
             CitiChain Dashboard
           </h1>
           <p className="text-gray-600">
-            Welcome back, {newAccountData.name || accountData?.user_id?.fullname || "User"}! Your
-            blockchain banking overview.
+            Welcome back,{" "}
+            {newAccountData.name || accountData?.user_id?.fullname || "User"}!
+            Your blockchain banking overview.
           </p>
         </div>
 
@@ -245,15 +246,19 @@ const Dashboard = () => {
         </div>
 
         {/* Quick Actions Footer */}
-        <div className="bg-white rounded-xl shadow-sm border my-6  border-gray-100 p-6">
+        <div className="bg-white rounded-xl shadow-sm border my-6 border-gray-100 p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
             Quick Actions
           </h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <button className="bg-blue-50 text-blue-600 p-4 rounded-lg hover:bg-blue-100 transition-colors flex flex-col items-center">
+            <Link
+              to="/transfer-money"
+              className="bg-blue-50 text-blue-600 p-4 rounded-lg hover:bg-blue-100 transition-colors flex flex-col items-center"
+            >
               <PlusIcon className="h-6 w-6 mb-2" />
               <span className="text-sm">Transfer Money</span>
-            </button>
+            </Link>
+
             <button className="bg-purple-50 text-purple-600 p-4 rounded-lg hover:bg-purple-100 transition-colors flex flex-col items-center">
               <ShieldCheckIcon className="h-6 w-6 mb-2" />
               <span className="text-sm">Update KYC</span>
@@ -280,13 +285,17 @@ const Dashboard = () => {
             <div className="space-y-2">
               <p className="text-sm opacity-90">Account Number</p>
               <p className="text-xl font-mono">
-                {newAccountData._id || accountData?.account_number || "**** **** **** ****"}
+                {newAccountData._id ||
+                  accountData?.account_number ||
+                  "**** **** **** ****"}
               </p>
               <div className="flex justify-between items-end mt-4">
                 <div>
                   <p className="text-sm opacity-90">Account Holder</p>
                   <p className="font-semibold">
-                    {newAccountData.name || accountData?.user_id?.fullname || "Account Holder"}
+                    {newAccountData.name ||
+                      accountData?.user_id?.fullname ||
+                      "Account Holder"}
                   </p>
                 </div>
                 <div>
@@ -300,7 +309,9 @@ const Dashboard = () => {
                 <div>
                   <p className="text-sm opacity-90">Wallet Address</p>
                   <p className="font-semibold capitalize">
-                    {newAccountData.wallet_address || accountData?.account_type || "Savings"}
+                    {newAccountData.wallet_address ||
+                      accountData?.account_type ||
+                      "Savings"}
                   </p>
                 </div>
                 <div>
