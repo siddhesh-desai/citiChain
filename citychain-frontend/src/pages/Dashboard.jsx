@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { getAccountDetails } from "../services/accountDetails";
 import {
   CreditCardIcon,
@@ -202,15 +203,19 @@ const Dashboard = () => {
         </div>
 
         {/* Quick Actions Footer */}
-        <div className="bg-white rounded-xl shadow-sm border my-6  border-gray-100 p-6">
+        <div className="bg-white rounded-xl shadow-sm border my-6 border-gray-100 p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
             Quick Actions
           </h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <button className="bg-blue-50 text-blue-600 p-4 rounded-lg hover:bg-blue-100 transition-colors flex flex-col items-center">
+            <Link
+              to="/transfer-money"
+              className="bg-blue-50 text-blue-600 p-4 rounded-lg hover:bg-blue-100 transition-colors flex flex-col items-center"
+            >
               <PlusIcon className="h-6 w-6 mb-2" />
               <span className="text-sm">Transfer Money</span>
-            </button>
+            </Link>
+
             <button className="bg-purple-50 text-purple-600 p-4 rounded-lg hover:bg-purple-100 transition-colors flex flex-col items-center">
               <ShieldCheckIcon className="h-6 w-6 mb-2" />
               <span className="text-sm">Update KYC</span>

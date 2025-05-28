@@ -9,6 +9,7 @@ import KYCRegistration from "./pages/KYCRegistration.jsx"; // Keep this for refe
 import Login from "./pages/Login";
 import Register from "./pages/Register"; // This is now Sign Up (Open Bank Account)
 import Footer from "./components/Footer";
+import TransferMoneyPage from "./pages/TransferMoneyPage";
 
 function App() {
   return (
@@ -22,6 +23,14 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />{" "}
               {/* No protection - this is Sign Up */}
+              <Route
+                path="/transfer-money"
+                element={
+                  <ProtectedRoute>
+                    <TransferMoneyPage />
+                  </ProtectedRoute>
+                }
+              />
               <Route
                 path="/dashboard"
                 element={
