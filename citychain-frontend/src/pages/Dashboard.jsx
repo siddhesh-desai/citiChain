@@ -1,10 +1,6 @@
 import React, { useState, useEffect } from "react";
-<<<<<<< HEAD
 import { Link } from "react-router-dom";
 import { getAccountDetails } from "../services/accountDetails";
-=======
-import { getAccountDetails, getBalance, getnewAccountDetails} from "../services/accountDetails";
->>>>>>> 2658c71c86604a5ce98c43094cf018c813324779
 import {
   CreditCardIcon,
   BanknotesIcon,
@@ -87,7 +83,7 @@ const Dashboard = () => {
   //     try {
   //       const balance = await getBalance();
   //       if (accountData) {
-  //         setAccountData((prevData) => ({ 
+  //         setAccountData((prevData) => ({
   //           ...prevData,
   //           current_balance: balance,
   //         }));
@@ -97,37 +93,36 @@ const Dashboard = () => {
   //       setError("Failed to load balance data");
   //     }
   //   };
-    
+
   //   fetchAccountData();
   //   fetchBalance();
   // }, []);
 
   // Enhanced stats with reputation score
-  
+
   useEffect(() => {
-  const fetchAllData = async () => {
-    try {
-      const [account, balance, details] = await Promise.all([
-        getAccountDetails(),
-        getBalance(),
-        getnewAccountDetails(),
-      ]);
-      setAccountData({
-        ...account,
-        current_balance: balance,
-      });
-      setNewAccountData(details);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      setError("Failed to load account or balance data");
-    } finally {
-      setLoading(false);
-    }
-  };
+    const fetchAllData = async () => {
+      try {
+        const [account, balance, details] = await Promise.all([
+          getAccountDetails(),
+          getBalance(),
+          getnewAccountDetails(),
+        ]);
+        setAccountData({
+          ...account,
+          current_balance: balance,
+        });
+        setNewAccountData(details);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setError("Failed to load account or balance data");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  fetchAllData();
-}, []);
-
+    fetchAllData();
+  }, []);
 
   const stats = accountData
     ? [
@@ -190,8 +185,9 @@ const Dashboard = () => {
             CitiChain Dashboard
           </h1>
           <p className="text-gray-600">
-            Welcome back, {newAccountData.name || accountData?.user_id?.fullname || "User"}! Your
-            blockchain banking overview.
+            Welcome back,{" "}
+            {newAccountData.name || accountData?.user_id?.fullname || "User"}!
+            Your blockchain banking overview.
           </p>
         </div>
 
@@ -289,13 +285,17 @@ const Dashboard = () => {
             <div className="space-y-2">
               <p className="text-sm opacity-90">Account Number</p>
               <p className="text-xl font-mono">
-                {newAccountData._id || accountData?.account_number || "**** **** **** ****"}
+                {newAccountData._id ||
+                  accountData?.account_number ||
+                  "**** **** **** ****"}
               </p>
               <div className="flex justify-between items-end mt-4">
                 <div>
                   <p className="text-sm opacity-90">Account Holder</p>
                   <p className="font-semibold">
-                    {newAccountData.name || accountData?.user_id?.fullname || "Account Holder"}
+                    {newAccountData.name ||
+                      accountData?.user_id?.fullname ||
+                      "Account Holder"}
                   </p>
                 </div>
                 <div>
@@ -309,7 +309,9 @@ const Dashboard = () => {
                 <div>
                   <p className="text-sm opacity-90">Wallet Address</p>
                   <p className="font-semibold capitalize">
-                    {newAccountData.wallet_address || accountData?.account_type || "Savings"}
+                    {newAccountData.wallet_address ||
+                      accountData?.account_type ||
+                      "Savings"}
                   </p>
                 </div>
                 <div>
