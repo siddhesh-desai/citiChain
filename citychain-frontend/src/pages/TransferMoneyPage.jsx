@@ -10,8 +10,10 @@ import {
   QrCodeIcon,
 } from "@heroicons/react/24/outline";
 
+import {dotransfer} from "../services/accountDetails"; // Adjust the import path as necessary
 const TransferMoneyPage = () => {
   const navigate = useNavigate();
+  const [data, setData] = useState(null); // Global variable to store transfer details
   const [currentStep, setCurrentStep] = useState(1);
   const [transferData, setTransferData] = useState({
     recipientType: "upi", // 'upi', 'account', 'phone'
@@ -26,7 +28,7 @@ const TransferMoneyPage = () => {
   // Validation functions
   const validateUPI = (upi) => /^[\w.\-_]{2,}@[a-zA-Z]{2,}$/.test(upi);
   const validatePhone = (phone) => /^[6-9]\d{9}$/.test(phone);
-  const validateAccount = (account) => /^\d{9,18}$/.test(account);
+  const validateAccount = (account) => true;
 
   const handleInputChange = (field, value) => {
     setTransferData((prev) => ({ ...prev, [field]: value }));
@@ -104,7 +106,26 @@ const TransferMoneyPage = () => {
 
     try {
       // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // await new Promise((resolve) => setTimeout(resolve, 2000));
+      const response = await dotransfer(
+        transferData.recipient,
+        transferData.amount
+      );
+      // if (!response || response.status !== "success") {
+      //   throw new Error("Transfer failed");
+      // }
+      const datas = response.data;
+      // Set global variable or state with transfer details
+
+      console.log("Transfer response:", datas);
+      setData({
+        ...datas,
+        recipient: transferData.recipient,
+        amount: transferData.amount,
+        note: transferData.note,
+      });
+
+
 
       console.log("Transfer successful:", {
         ...transferData,
@@ -113,6 +134,7 @@ const TransferMoneyPage = () => {
       });
 
       setCurrentStep(3); // Success step
+
     } catch (error) {
       setErrors({ submit: "Transfer failed. Please try again." });
     } finally {
@@ -463,8 +485,8 @@ const TransferMoneyPage = () => {
                   </h3>
                   <div className="space-y-3 text-left">
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Transaction ID:</span>
-                      <span className="font-mono text-sm">TXN{Date.now()}</span>
+                      <span className="text-gray-600">Transaction hash:</span>
+                      <span className="font-mono text-sm">{data?.tx_hash || "5c661056cdc58b5e4019beb9e491aa8ed03c16be078b9a18f6f1bd0598d84102"}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">To:</span>

@@ -20,4 +20,11 @@ export const mockAadhaarDB = [
     gender: "Male",
     linked_pan: "ABCDE1234G",
   },
+  {
+    aadhaar_number: "987698769876",
+    fullname: "Siddhesh Gite",
+    dob: "2004-04-27",
+    gender: "Male",
+    linked_pan: "ABCDE1234H",
+  }
 ];

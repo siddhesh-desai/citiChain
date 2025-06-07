@@ -17,4 +17,10 @@ export const mockPanDB = [
     dob: "2004-04-27",
     aadhaar_linked: true,
   },
+  {
+    pan_number: "ABCDE1234H",
+    fullname: "Siddhesh Gite",
+    dob: "2004-04-27",
+    aadhaar_linked: true,
+  }
 ];
